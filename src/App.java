@@ -40,6 +40,7 @@ public class App extends Application {
     Stage window;
     private int decision;
     private int sadPoints = 0;
+    Label dialogue;
     MediaPlayer soundEffectMediaPlayer;
     public static void main(String[] args) {
         launch(args);
@@ -48,18 +49,19 @@ public class App extends Application {
     public void start(Stage window) throws Exception {
         Image soldier = new Image(new FileInputStream("images/soldier.png"));
         ImageView startImageView1 = new ImageView(); 
-        startImageView1.setX(50); 
-        startImageView1.setY(25); 
-        startImageView1.setFitHeight(300); 
-        startImageView1.setFitWidth(300); 
-        startImageView1.setPreserveRatio(true);  
+        Font font = Font.loadFont("file:font.ttf", 50);
+        startImageView1.setX(50);
+        startImageView1.setY(25);
+        startImageView1.setFitHeight(600);
+        startImageView1.setFitWidth(600);
+        startImageView1.setPreserveRatio(true);
         Group startImage1 = new Group(startImageView1);
         startImageView1.setImage(soldier);
         ImageView startImageView2 = new ImageView(); 
         startImageView2.setX(50); 
         startImageView2.setY(25); 
-        startImageView2.setFitHeight(300); 
-        startImageView2.setFitWidth(300); 
+        startImageView2.setFitHeight(600); 
+        startImageView2.setFitWidth(600); 
         startImageView2.setPreserveRatio(true);  
         Group startImage2 = new Group(startImageView2);
         startImageView2.setImage(soldier);
@@ -69,6 +71,18 @@ public class App extends Application {
         playButton.setPrefSize(80, 30);
         playButton.setStyle("-fx-font-size: 18; ");
         
+        playButton.setOnAction(e -> {
+            animate("You're sitting at home relaxing when suddenly the doorbell rings...");
+            dingDong();
+        });
+
+        dialogue = new Label();
+        dialogue.setFont(font);
+        
+        HBox dBox = new HBox();
+        dBox.getChildren().add(dialogue);
+        dBox.setAlignment(Pos.CENTER);
+        
         BorderPane startScreenLayout = new BorderPane();
         BorderPane.setMargin(playButton, new Insets(10, 10, 10, 10));
         startScreenLayout.setCenter(playButton);
@@ -76,10 +90,11 @@ public class App extends Application {
         startScreenLayout.setLeft(startImage1);
         BorderPane.setMargin(startImage2, new Insets(10, 10, 10, 10));
         startScreenLayout.setRight(startImage2);
+        BorderPane.setMargin(dBox, new Insets(10, 10, 150, 10));
+        startScreenLayout.setBottom(dBox);
         Scene scene = new Scene(startScreenLayout, 1920, 1000);
         window.setScene(scene);
         window.show();
-
     }
 
     // plays animation of person sitting down sipping tea
@@ -103,16 +118,16 @@ public class App extends Application {
     // DECISION 4: rescue or run away
     // if GO TO SAFETY: 
 
-    public static void animate(String content) {
+    public void animate(String content) {
         Animation animation = new Transition() {
             {
                 setCycleDuration(Duration.millis(2500));
             }
         
             protected void interpolate(double frac) {
-                // int length = content.length();
-                // int n = Math.round(length * (float) frac);
-                // //label.setText(content.substring(0, n));
+                int length = content.length();
+                int n = Math.round(length * (float) frac);
+                dialogue.setText(content.substring(0, n));
             }
         
         };
@@ -180,11 +195,14 @@ public class App extends Application {
         Media h = new Media(Paths.get(s).toUri().toString());
         soundEffectMediaPlayer = new MediaPlayer(h);
         soundEffectMediaPlayer.setVolume(0.1);
-        soundEffectMediaPlayer.setOnEndOfMedia(new Runnable() {
-            public void run() {
-                soundEffectMediaPlayer.seek(Duration.ZERO);
-            }
-        });
+        soundEffectMediaPlayer.play();
+    }
+
+    public void dingDong() {
+        String s = "sounds/dingDong.mp3";
+        Media h = new Media(Paths.get(s).toUri().toString());
+        soundEffectMediaPlayer = new MediaPlayer(h);
+        soundEffectMediaPlayer.setVolume(0.1);
         soundEffectMediaPlayer.play();
     }
 
@@ -193,11 +211,6 @@ public class App extends Application {
         Media h = new Media(Paths.get(s).toUri().toString());
         soundEffectMediaPlayer = new MediaPlayer(h);
         soundEffectMediaPlayer.setVolume(0.1);
-        soundEffectMediaPlayer.setOnEndOfMedia(new Runnable() {
-            public void run() {
-                soundEffectMediaPlayer.seek(Duration.ZERO);
-            }
-        });
         soundEffectMediaPlayer.play();
     }
 
@@ -206,11 +219,6 @@ public class App extends Application {
         Media h = new Media(Paths.get(s).toUri().toString());
         soundEffectMediaPlayer = new MediaPlayer(h);
         soundEffectMediaPlayer.setVolume(0.1);
-        soundEffectMediaPlayer.setOnEndOfMedia(new Runnable() {
-            public void run() {
-                soundEffectMediaPlayer.seek(Duration.ZERO);
-            }
-        });
         soundEffectMediaPlayer.play();
     }
 
@@ -219,11 +227,6 @@ public class App extends Application {
         Media h = new Media(Paths.get(s).toUri().toString());
         soundEffectMediaPlayer = new MediaPlayer(h);
         soundEffectMediaPlayer.setVolume(0.1);
-        soundEffectMediaPlayer.setOnEndOfMedia(new Runnable() {
-            public void run() {
-                soundEffectMediaPlayer.seek(Duration.ZERO);
-            }
-        });
         soundEffectMediaPlayer.play();
     }
 
