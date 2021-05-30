@@ -7,6 +7,7 @@ import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
+import javafx.scene.control.TextField;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.KeyCode;
@@ -25,6 +26,7 @@ import javafx.scene.media.Media;
 import javafx.scene.media.MediaPlayer;
 import javafx.scene.media.MediaView;
 import javafx.scene.text.Font;
+import javafx.scene.text.FontPosture;
 import javafx.scene.text.FontWeight;
 import javafx.scene.text.Text;
 import javafx.scene.text.TextAlignment;
@@ -34,25 +36,43 @@ import javafx.util.Duration;
 import java.io.FileInputStream;
 import java.nio.file.Paths;
 import javafx.animation.Animation;
+import javafx.animation.FadeTransition;
 import javafx.animation.KeyFrame;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 public class App extends Application {
     Stage window;
     private int decision;
+    String name;
     private int sadPoints = 0;
+    BorderPane startScreenLayout = new BorderPane();
     Label dialogue;
+    VBox vDBox = new VBox();
+    HBox decisionHBox = new HBox();
     Scene scene;
-    int progressInt;
+    Label talker = new Label();
+    int progressInt = 0;
     MediaPlayer soundEffectMediaPlayer;
+    String text;
+    FadeTransition fade = new FadeTransition(); 
+    FadeTransition ft = new FadeTransition(Duration.millis(1000));
     public static void main(String[] args) {
         launch(args);
     }
     @Override
     public void start(Stage window) throws Exception {
+        fade.setDuration(Duration.millis(3000));   
+        fade.setFromValue(10);  
+        fade.setToValue(0.1);  
+        fade.setCycleCount(1);  
+        ft.setFromValue(0.1);
+        ft.setToValue(10);
+
         Image soldier = new Image(new FileInputStream("images/soldier.png"));
         ImageView startImageView1 = new ImageView(); 
         Font font = Font.loadFont("file:font.ttf", 35);
+        Font font1 = Font.loadFont("file:font.ttf", 45);
+        Font fontI = Font.font("file:font.ttf", FontWeight.BOLD, FontPosture.ITALIC, 30);
         startImageView1.setX(50);
         startImageView1.setY(25);
         startImageView1.setFitHeight(600);
@@ -75,9 +95,15 @@ public class App extends Application {
         playButton.setPrefSize(80, 30);
         playButton.setStyle("-fx-font-size: 24; ");
 
+        TextField nameTextField = new TextField();
+
         Label titleText = new Label("The Things They Carried:\n\t\t   The Game");
         titleText.setFont(font);
-        beginningVBox.getChildren().addAll(titleText, playButton);
+        Label nameText = new Label("Enter your name.");
+        nameText.setFont(font);
+        Label welcomeText = new Label();
+        welcomeText.setFont(font);
+        beginningVBox.getChildren().addAll(titleText, nameTextField, nameText);
         beginningVBox.setAlignment(Pos.CENTER);
         beginningVBox.setSpacing(20);
         beginningVBox.setPadding(new Insets(10,10,10,10));
@@ -88,16 +114,24 @@ public class App extends Application {
         HBox dBox = new HBox();
         dBox.getChildren().add(dialogue);
         dBox.setAlignment(Pos.CENTER);
-        
-        BorderPane startScreenLayout = new BorderPane();
+
+        HBox talkerBox = new HBox();
+        talker.setFont(font1);
+        talkerBox.getChildren().add(talker);
+        talkerBox.setPadding(new Insets(0, 0, 0, 20));
+        talkerBox.setAlignment(Pos.BASELINE_LEFT);
+
+        vDBox.getChildren().addAll(talkerBox, dBox);
+        vDBox.setSpacing(20);
+
         BorderPane.setMargin(beginningVBox, new Insets(10, 10, 10, 10));
         startScreenLayout.setCenter(beginningVBox);
         BorderPane.setMargin(startImage1, new Insets(10, 10, 10, 10));
         startScreenLayout.setLeft(startImage1);
         BorderPane.setMargin(startImage2, new Insets(10, 10, 10, 10));
         startScreenLayout.setRight(startImage2);
-        BorderPane.setMargin(dBox, new Insets(10, 10, 150, 10));
-        startScreenLayout.setBottom(dBox);
+        BorderPane.setMargin(vDBox, new Insets(10, 10, 150, 10));
+        startScreenLayout.setBottom(vDBox);
         scene = new Scene(startScreenLayout, 1280, 720);
         window.setScene(scene);
         window.show();
@@ -108,8 +142,25 @@ public class App extends Application {
             startScreenLayout.setLeft(null);
             startScreenLayout.setCenter(null);
             startScreenLayout.setTop(beginningVBox);
+            beginningVBox.getChildren().remove(welcomeText);
             beginningVBox.getChildren().remove(playButton);
+            talker.setText("Narrator");
             animate("You're sitting at home relaxing when suddenly the doorbell rings...");
+        });
+
+        scene.setOnKeyPressed(e -> {
+            if (e.getCode() == KeyCode.ENTER) {
+                if (progressInt == 0) {
+                    beginningVBox.getChildren().clear();
+                    beginningVBox.getChildren().addAll(titleText, welcomeText, playButton);
+                    name = nameTextField.getText();
+                    welcomeText.setText("Hi " + name + ".");
+            }
+            }
+            if (e.getCode() == KeyCode.SPACE) {
+                dialogueMethod();
+                progressInt++;
+            }
         });
     }
 
@@ -149,24 +200,50 @@ public class App extends Application {
         };
         // use .setOnFinished to make something happen only after the animation finishes
         if (progressInt == 1) {
-            animation.play();
             animation.setOnFinished(e -> {
                 dingDong();
-
             });
+            progressInt++;
         }
-        scene.setOnKeyPressed(e -> {
-            if (e.getCode() == KeyCode.SPACE) {
-                animation.play();
-            }
-        });
+        animation.play();
     }
+    public void dialogueMethod() {
+        if (progressInt == 2)
+            animate("You open the door and see a letter.");
+        else if (progressInt == 3) {
+            talker.setText("You (" + name + ")");
+            animate("Oh no...");
+        }
+        else if (progressInt == 4) {
+            fade.setNode(startScreenLayout); 
+            ft.setNode(startScreenLayout);
+            fade.setOnFinished(e -> {
+                decision("Open the Letter", "Don't Open the Letter.");
+                ft.play();
+            });
+            fade.play();  
+        }
+        
+    }
+    public void decision(String choice1, String choice2) {
+        Button choice1Button = new Button(choice1);
+        Button choice2Button = new Button(choice2);
+        choice1Button.setPrefSize(600, 600);
+        choice2Button.setPrefSize(600, 600);
+        choice1Button.setStyle("-fx-font-size: 50");
+        choice2Button.setStyle("-fx-font-size: 50");
+        decisionHBox.getChildren().addAll(choice1Button, choice2Button);
+        decisionHBox.setSpacing(15);
+        decisionHBox.setAlignment(Pos.CENTER);
+        startScreenLayout.setRight(null);
+        startScreenLayout.setLeft(null);
+        startScreenLayout.setBottom(null);
+        startScreenLayout.setCenter(decisionHBox);
+        if (progressInt == 5) {
+            choice1Button.setOnAction(e -> openLetter());
+            choice2Button.setOnAction(e -> dontOpenLetter());
+        }
 
-    public int decision(String choice1, String choice2) {
-        // enter code for making decisions
-        // only the making, not the consequences
-        decision = 1;
-        return decision;
     }
     public void playAnimation(String animationName) {
 
@@ -187,10 +264,16 @@ public class App extends Application {
         //whatever
     }
     public void dontOpenLetter() {
-
+        startScreenLayout.setCenter(null);
+        startScreenLayout.setBottom(vDBox);
+        talker.setText("Narrator");
+        animate("You throw the letter into the trash bin.");
     }
     public void openLetter() {
-
+        startScreenLayout.setCenter(null);
+        startScreenLayout.setBottom(vDBox);
+        talker.setText("Narrator");
+        animate("You open the letter.");
     }
     public void GoToWar() {
 
@@ -205,7 +288,6 @@ public class App extends Application {
         addSadPoints(-2);
     }
     public void dontTalk() {
-
 
     }
     public void goToSafety() {
