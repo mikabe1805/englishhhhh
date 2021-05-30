@@ -9,6 +9,7 @@ import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import javafx.scene.input.KeyCode;
 import javafx.scene.layout.Background;
 import javafx.scene.layout.BackgroundImage;
 import javafx.scene.layout.BackgroundPosition;
@@ -41,6 +42,8 @@ public class App extends Application {
     private int decision;
     private int sadPoints = 0;
     Label dialogue;
+    Scene scene;
+    int progressInt;
     MediaPlayer soundEffectMediaPlayer;
     public static void main(String[] args) {
         launch(args);
@@ -49,7 +52,7 @@ public class App extends Application {
     public void start(Stage window) throws Exception {
         Image soldier = new Image(new FileInputStream("images/soldier.png"));
         ImageView startImageView1 = new ImageView(); 
-        Font font = Font.loadFont("file:font.ttf", 50);
+        Font font = Font.loadFont("file:font.ttf", 35);
         startImageView1.setX(50);
         startImageView1.setY(25);
         startImageView1.setFitHeight(600);
@@ -66,15 +69,18 @@ public class App extends Application {
         Group startImage2 = new Group(startImageView2);
         startImageView2.setImage(soldier);
 
+        VBox beginningVBox = new VBox();
         window.setTitle("English Project");
         Button playButton = new Button("Play");
         playButton.setPrefSize(80, 30);
-        playButton.setStyle("-fx-font-size: 18; ");
-        
-        playButton.setOnAction(e -> {
-            animate("You're sitting at home relaxing when suddenly the doorbell rings...");
-            dingDong();
-        });
+        playButton.setStyle("-fx-font-size: 24; ");
+
+        Label titleText = new Label("The Things They Carried:\n\t\t   The Game");
+        titleText.setFont(font);
+        beginningVBox.getChildren().addAll(titleText, playButton);
+        beginningVBox.setAlignment(Pos.CENTER);
+        beginningVBox.setSpacing(20);
+        beginningVBox.setPadding(new Insets(10,10,10,10));
 
         dialogue = new Label();
         dialogue.setFont(font);
@@ -84,17 +90,27 @@ public class App extends Application {
         dBox.setAlignment(Pos.CENTER);
         
         BorderPane startScreenLayout = new BorderPane();
-        BorderPane.setMargin(playButton, new Insets(10, 10, 10, 10));
-        startScreenLayout.setCenter(playButton);
+        BorderPane.setMargin(beginningVBox, new Insets(10, 10, 10, 10));
+        startScreenLayout.setCenter(beginningVBox);
         BorderPane.setMargin(startImage1, new Insets(10, 10, 10, 10));
         startScreenLayout.setLeft(startImage1);
         BorderPane.setMargin(startImage2, new Insets(10, 10, 10, 10));
         startScreenLayout.setRight(startImage2);
         BorderPane.setMargin(dBox, new Insets(10, 10, 150, 10));
         startScreenLayout.setBottom(dBox);
-        Scene scene = new Scene(startScreenLayout, 1920, 1000);
+        scene = new Scene(startScreenLayout, 1280, 720);
         window.setScene(scene);
         window.show();
+
+        playButton.setOnAction(e -> {
+            progressInt = 1;
+            startScreenLayout.setRight(null);
+            startScreenLayout.setLeft(null);
+            startScreenLayout.setCenter(null);
+            startScreenLayout.setTop(beginningVBox);
+            beginningVBox.getChildren().remove(playButton);
+            animate("You're sitting at home relaxing when suddenly the doorbell rings...");
+        });
     }
 
     // plays animation of person sitting down sipping tea
@@ -131,8 +147,19 @@ public class App extends Application {
             }
         
         };
-        
-        animation.play();
+        // use .setOnFinished to make something happen only after the animation finishes
+        if (progressInt == 1) {
+            animation.play();
+            animation.setOnFinished(e -> {
+                dingDong();
+
+            });
+        }
+        scene.setOnKeyPressed(e -> {
+            if (e.getCode() == KeyCode.SPACE) {
+                animation.play();
+            }
+        });
     }
 
     public int decision(String choice1, String choice2) {
