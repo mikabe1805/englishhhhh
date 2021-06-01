@@ -11,6 +11,7 @@ import javafx.scene.control.TextField;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.KeyCode;
+import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.Background;
 import javafx.scene.layout.BackgroundImage;
 import javafx.scene.layout.BackgroundPosition;
@@ -25,6 +26,7 @@ import javafx.scene.layout.VBox;
 import javafx.scene.media.Media;
 import javafx.scene.media.MediaPlayer;
 import javafx.scene.media.MediaView;
+import javafx.scene.media.MediaPlayer.Status;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontPosture;
 import javafx.scene.text.FontWeight;
@@ -33,6 +35,8 @@ import javafx.scene.text.TextAlignment;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.util.Duration;
+
+import java.io.File;
 import java.io.FileInputStream;
 import java.nio.file.Paths;
 import javafx.animation.Animation;
@@ -54,6 +58,10 @@ public class App extends Application {
     int progressInt = 0;
     MediaPlayer soundEffectMediaPlayer;
     String text;
+    MediaPlayer mediaPlayer;
+    MediaPlayer mediaPlayer2;
+    Group letterImage;
+    Group root2 = new Group(); 
     FadeTransition fade = new FadeTransition(); 
     FadeTransition ft = new FadeTransition(Duration.millis(1000));
     public static void main(String[] args) {
@@ -67,12 +75,11 @@ public class App extends Application {
         fade.setCycleCount(1);  
         ft.setFromValue(0.1);
         ft.setToValue(10);
+        Font font = Font.loadFont("file:font.ttf", 35);
+        Font font1 = Font.loadFont("file:font.ttf", 45);
 
         Image soldier = new Image(new FileInputStream("images/soldier.png"));
         ImageView startImageView1 = new ImageView(); 
-        Font font = Font.loadFont("file:font.ttf", 35);
-        Font font1 = Font.loadFont("file:font.ttf", 45);
-        Font fontI = Font.font("file:font.ttf", FontWeight.BOLD, FontPosture.ITALIC, 30);
         startImageView1.setX(50);
         startImageView1.setY(25);
         startImageView1.setFitHeight(600);
@@ -89,6 +96,30 @@ public class App extends Application {
         Group startImage2 = new Group(startImageView2);
         startImageView2.setImage(soldier);
 
+        Image letter = new Image(new FileInputStream("images/letter.png"));
+        ImageView letterImageView = new ImageView();
+        letterImageView.setX(50);
+        letterImageView.setY(25);
+        letterImageView.setFitHeight(2120);
+        letterImageView.setFitWidth(1280); 
+        letterImageView.setPreserveRatio(true);
+        letterImage = new Group(letterImageView);
+        letterImageView.setImage(letter);
+
+        String path = "animations/beginning.mp4";  
+        Media media = new Media(new File(path).toURI().toString());  
+        mediaPlayer = new MediaPlayer(media);  
+        MediaView mediaView = new MediaView(mediaPlayer);  
+        mediaPlayer.setCycleCount(MediaPlayer.INDEFINITE);
+        Group root = new Group();  
+        root.getChildren().add(mediaView);  
+
+        String path2 = "animations/letter.mp4";
+        Media media2 = new Media(new File(path2).toURI().toString());  
+        mediaPlayer2 = new MediaPlayer(media2);  
+        MediaView mediaView2 = new MediaView(mediaPlayer2);  
+        root2.getChildren().add(mediaView2);  
+        
         VBox beginningVBox = new VBox();
         window.setTitle("English Project");
         Button playButton = new Button("Play");
@@ -140,10 +171,11 @@ public class App extends Application {
             progressInt = 1;
             startScreenLayout.setRight(null);
             startScreenLayout.setLeft(null);
-            startScreenLayout.setCenter(null);
+            startScreenLayout.setCenter(root);
             startScreenLayout.setTop(beginningVBox);
             beginningVBox.getChildren().remove(welcomeText);
             beginningVBox.getChildren().remove(playButton);
+            mediaPlayer.play();
             talker.setText("Narrator");
             animate("You're sitting at home relaxing when suddenly the doorbell rings...");
         });
@@ -159,7 +191,6 @@ public class App extends Application {
             }
             if (e.getCode() == KeyCode.SPACE) {
                 dialogueMethod();
-                progressInt++;
             }
         });
     }
@@ -208,11 +239,18 @@ public class App extends Application {
         animation.play();
     }
     public void dialogueMethod() {
-        if (progressInt == 2)
-            animate("You open the door and see a letter.");
+        if (progressInt == 2) {
+            mediaPlayer.stop();
+            mediaPlayer2.play();
+            startScreenLayout.setCenter(root2);
+            animate("You walk to the door and see a letter. You pick it up.");
+            progressInt++;
+        }
         else if (progressInt == 3) {
+            startScreenLayout.setCenter(letterImage);
             talker.setText("You (" + name + ")");
             animate("Oh no...");
+            progressInt++;
         }
         else if (progressInt == 4) {
             fade.setNode(startScreenLayout); 
@@ -222,6 +260,7 @@ public class App extends Application {
                 ft.play();
             });
             fade.play();  
+            progressInt++;
         }
         
     }
