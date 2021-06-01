@@ -61,7 +61,10 @@ public class App extends Application {
     MediaPlayer mediaPlayer;
     MediaPlayer mediaPlayer2;
     Group letterImage;
+    Image letter; 
+    Image letter2; 
     Group root2 = new Group(); 
+    ImageView letterImageView = new ImageView();
     FadeTransition fade = new FadeTransition(); 
     FadeTransition ft = new FadeTransition(Duration.millis(1000));
     public static void main(String[] args) {
@@ -96,8 +99,8 @@ public class App extends Application {
         Group startImage2 = new Group(startImageView2);
         startImageView2.setImage(soldier);
 
-        Image letter = new Image(new FileInputStream("images/letter.png"));
-        ImageView letterImageView = new ImageView();
+        letter = new Image(new FileInputStream("images/letter.png"));
+        letter2 = new Image(new FileInputStream("images/openedletter.png"));
         letterImageView.setX(50);
         letterImageView.setY(25);
         letterImageView.setFitHeight(2120);
@@ -190,6 +193,8 @@ public class App extends Application {
             }
             }
             if (e.getCode() == KeyCode.SPACE) {
+                progressInt++;
+                System.out.println(progressInt);
                 dialogueMethod();
             }
         });
@@ -234,7 +239,6 @@ public class App extends Application {
             animation.setOnFinished(e -> {
                 dingDong();
             });
-            progressInt++;
         }
         animation.play();
     }
@@ -242,17 +246,20 @@ public class App extends Application {
         if (progressInt == 2) {
             mediaPlayer.stop();
             mediaPlayer2.play();
+            mediaPlayer2.setRate(1.5);
             startScreenLayout.setCenter(root2);
-            animate("You walk to the door and see a letter. You pick it up.");
-            progressInt++;
+            animate("You walk to the door and see a letter.");
         }
         else if (progressInt == 3) {
+            talker.setText("");
+            animate("");
             startScreenLayout.setCenter(letterImage);
-            talker.setText("You (" + name + ")");
-            animate("Oh no...");
-            progressInt++;
         }
         else if (progressInt == 4) {
+            talker.setText("You (" + name + ")");
+            animate("Oh no...");
+        }
+        else if (progressInt == 5) {
             fade.setNode(startScreenLayout); 
             ft.setNode(startScreenLayout);
             fade.setOnFinished(e -> {
@@ -260,10 +267,30 @@ public class App extends Application {
                 ft.play();
             });
             fade.play();  
-            progressInt++;
         }
-        
+        else if (progressInt == 6) {
+            talker.setText("");
+            animate("");
+            startScreenLayout.setCenter(letterImage);
+            startScreenLayout.setBottom(vDBox);
+            if (openletter)
+                letterOpening();
+        }
+        else if (progressInt == 7 && openletter) {
+            openLetter();
+        }
+        else if (progressInt == 7 && dontopenletter) {
+            dontOpenLetter();
+        }
+        else if (progressInt > 7 && progressInt < 10 && openletter) {
+            animate("...");
+        }
+        else if (progressInt == 10 && openletter) {
+            animate("...what do I do?");
+        }
     }
+    boolean dontopenletter;
+    boolean openletter;
     public void decision(String choice1, String choice2) {
         Button choice1Button = new Button(choice1);
         Button choice2Button = new Button(choice2);
@@ -279,10 +306,17 @@ public class App extends Application {
         startScreenLayout.setBottom(null);
         startScreenLayout.setCenter(decisionHBox);
         if (progressInt == 5) {
-            choice1Button.setOnAction(e -> openLetter());
-            choice2Button.setOnAction(e -> dontOpenLetter());
+            choice1Button.setOnAction(e -> {
+                openletter = true;
+                progressInt++;
+                dialogueMethod();
+            });
+            choice2Button.setOnAction(e -> {
+                dontopenletter = true;
+                progressInt++;
+                dialogueMethod();
+            });
         }
-
     }
     public void playAnimation(String animationName) {
 
@@ -303,15 +337,14 @@ public class App extends Application {
         //whatever
     }
     public void dontOpenLetter() {
-        startScreenLayout.setCenter(null);
-        startScreenLayout.setBottom(vDBox);
+
+        startScreenLayout.setCenter(root2);
         talker.setText("Narrator");
         animate("You throw the letter into the trash bin.");
     }
     public void openLetter() {
-        startScreenLayout.setCenter(null);
-        startScreenLayout.setBottom(vDBox);
         talker.setText("Narrator");
+        letterImageView.setImage(letter2);
         animate("You open the letter.");
     }
     public void GoToWar() {
@@ -372,6 +405,14 @@ public class App extends Application {
 
     public void chuckle() {
         String s = "sounds/chuckle.mp3";
+        Media h = new Media(Paths.get(s).toUri().toString());
+        soundEffectMediaPlayer = new MediaPlayer(h);
+        soundEffectMediaPlayer.setVolume(0.1);
+        soundEffectMediaPlayer.play();
+    }
+
+    public void letterOpening() {
+        String s = "sounds/opening.mp3";
         Media h = new Media(Paths.get(s).toUri().toString());
         soundEffectMediaPlayer = new MediaPlayer(h);
         soundEffectMediaPlayer.setVolume(0.1);
