@@ -28,11 +28,6 @@ import javafx.scene.media.MediaPlayer;
 import javafx.scene.media.MediaView;
 import javafx.scene.media.MediaPlayer.Status;
 import javafx.scene.text.Font;
-import javafx.scene.text.FontPosture;
-import javafx.scene.text.FontWeight;
-import javafx.scene.text.Text;
-import javafx.scene.text.TextAlignment;
-import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.util.Duration;
 
@@ -41,9 +36,6 @@ import java.io.FileInputStream;
 import java.nio.file.Paths;
 import javafx.animation.Animation;
 import javafx.animation.FadeTransition;
-import javafx.animation.KeyFrame;
-import javafx.event.ActionEvent;
-import javafx.event.EventHandler;
 public class App extends Application {
     Stage window;
     private int decision;
@@ -150,6 +142,16 @@ public class App extends Application {
         beginningVBox.setSpacing(20);
         beginningVBox.setPadding(new Insets(10,10,10,10));
 
+
+        HBox beginningHBox = new HBox();
+        beginningHBox.getChildren().add(beginningVBox);
+        beginningHBox.setAlignment(Pos.CENTER);
+        beginningHBox.setSpacing(200);
+
+
+        Label sadText = new Label("Sad Points: 0");
+        sadText.setFont(font);
+
         dialogue = new Label();
         dialogue.setFont(font);
         
@@ -166,8 +168,8 @@ public class App extends Application {
         vDBox.getChildren().addAll(talkerBox, dBox);
         vDBox.setSpacing(20);
 
-        BorderPane.setMargin(beginningVBox, new Insets(10, 10, 10, 10));
-        startScreenLayout.setCenter(beginningVBox);
+        BorderPane.setMargin(beginningHBox, new Insets(10, 10, 10, 10));
+        startScreenLayout.setCenter(beginningHBox);
         BorderPane.setMargin(startImage1, new Insets(10, 10, 10, 10));
         startScreenLayout.setLeft(startImage1);
         BorderPane.setMargin(startImage2, new Insets(10, 10, 10, 10));
@@ -183,7 +185,9 @@ public class App extends Application {
             startScreenLayout.setRight(null);
             startScreenLayout.setLeft(null);
             startScreenLayout.setCenter(root);
-            startScreenLayout.setTop(beginningVBox);
+            startScreenLayout.setTop(beginningHBox);
+            beginningHBox.getChildren().add(sadText);
+            beginningHBox.setPadding(new Insets(10,10,10,370));
             beginningVBox.getChildren().remove(welcomeText);
             beginningVBox.getChildren().remove(playButton);
             mediaPlayer.play();
@@ -353,7 +357,8 @@ public class App extends Application {
     }
 
     public void addSadPoints(int amount) {
-
+        sadPoints+=amount;
+        // animate numbers going up and call ding() after each one
         // make it add sad points 1 by 1 and play a ding sound
     }
 
