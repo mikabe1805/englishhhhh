@@ -60,10 +60,12 @@ public class App extends Application {
     String text;
     MediaPlayer mediaPlayer;
     MediaPlayer mediaPlayer2;
+    MediaPlayer mediaPlayer3;
     Group letterImage;
     Image letter; 
     Image letter2; 
     Group root2 = new Group(); 
+    Group root3 = new Group(); 
     ImageView letterImageView = new ImageView();
     FadeTransition fade = new FadeTransition(); 
     FadeTransition ft = new FadeTransition(Duration.millis(1000));
@@ -123,6 +125,12 @@ public class App extends Application {
         MediaView mediaView2 = new MediaView(mediaPlayer2);  
         root2.getChildren().add(mediaView2);  
         
+        String path3 = "animations/dodgedraft.mp4";
+        Media media3 = new Media(new File(path3).toURI().toString());  
+        mediaPlayer3 = new MediaPlayer(media3);  
+        MediaView mediaView3 = new MediaView(mediaPlayer3);  
+        root3.getChildren().add(mediaView3);  
+
         VBox beginningVBox = new VBox();
         window.setTitle("English Project");
         Button playButton = new Button("Play");
@@ -263,7 +271,7 @@ public class App extends Application {
             fade.setNode(startScreenLayout); 
             ft.setNode(startScreenLayout);
             fade.setOnFinished(e -> {
-                decision("Open the Letter", "Don't Open the Letter.");
+                decision("Open the Letter", "Don't Open the Letter");
                 ft.play();
             });
             fade.play();  
@@ -288,10 +296,20 @@ public class App extends Application {
         else if (progressInt == 10 && openletter) {
             animate("...what do I do?");
         }
+        else if (progressInt == 11 && openletter) {
+            fade.setNode(startScreenLayout); 
+            ft.setNode(startScreenLayout);
+            fade.setOnFinished(e -> {
+                decision("Dodge the Draft", "Go to War");
+                ft.play();
+            });
+            fade.play();  
+        }
     }
     boolean dontopenletter;
     boolean openletter;
     public void decision(String choice1, String choice2) {
+        decisionHBox.getChildren().clear();
         Button choice1Button = new Button(choice1);
         Button choice2Button = new Button(choice2);
         choice1Button.setPrefSize(600, 600);
@@ -315,6 +333,13 @@ public class App extends Application {
                 dontopenletter = true;
                 progressInt++;
                 dialogueMethod();
+            });
+        }
+        if (progressInt == 11) {
+            choice1Button.setOnAction(e -> {
+                dodgeDraft();
+            });
+            choice2Button.setOnAction(e -> {
             });
         }
     }
@@ -352,8 +377,10 @@ public class App extends Application {
         addSadPoints(4);
     }
     public void dodgeDraft() {
-
-
+        startScreenLayout.setCenter(root3);
+        mediaPlayer3.play();
+        mediaPlayer3.setRate(1.5);
+        startScreenLayout.setBottom(null);
     }
     public void talk() {
 
@@ -415,7 +442,7 @@ public class App extends Application {
         String s = "sounds/opening.mp3";
         Media h = new Media(Paths.get(s).toUri().toString());
         soundEffectMediaPlayer = new MediaPlayer(h);
-        soundEffectMediaPlayer.setVolume(0.1);
+        soundEffectMediaPlayer.setVolume(0.3);
         soundEffectMediaPlayer.play();
     }
 
