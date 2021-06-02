@@ -50,13 +50,19 @@ public class App extends Application {
     MediaPlayer mediaPlayer;
     MediaPlayer mediaPlayer2;
     MediaPlayer mediaPlayer3;
+    MediaPlayer mediaPlayer4;
+    MediaPlayer mediaPlayer5;
     Group letterImage;
     Image letter; 
     Image letter2; 
+    Image arrestedImage;
     Group root2 = new Group(); 
     Group root3 = new Group(); 
+    Group root4 = new Group(); 
+    Group root5 = new Group(); 
     ImageView letterImageView = new ImageView();
     FadeTransition fade = new FadeTransition(); 
+    FadeTransition fade2 = new FadeTransition(); 
     FadeTransition ft = new FadeTransition(Duration.millis(1000));
     public static void main(String[] args) {
         launch(args);
@@ -67,6 +73,10 @@ public class App extends Application {
         fade.setFromValue(10);  
         fade.setToValue(0.1);  
         fade.setCycleCount(1);  
+        fade2.setDuration(Duration.millis(3000));   
+        fade2.setFromValue(10);  
+        fade2.setToValue(0.1);  
+        fade2.setCycleCount(1); 
         ft.setFromValue(0.1);
         ft.setToValue(10);
         Font font = Font.loadFont("file:font.ttf", 35);
@@ -92,6 +102,7 @@ public class App extends Application {
 
         letter = new Image(new FileInputStream("images/letter.png"));
         letter2 = new Image(new FileInputStream("images/openedletter.png"));
+        arrestedImage = new Image(new FileInputStream("images/arrested.png"));
         letterImageView.setX(50);
         letterImageView.setY(25);
         letterImageView.setFitHeight(2120);
@@ -119,6 +130,19 @@ public class App extends Application {
         mediaPlayer3 = new MediaPlayer(media3);  
         MediaView mediaView3 = new MediaView(mediaPlayer3);  
         root3.getChildren().add(mediaView3);  
+
+        String path4 = "animations/dontopenletter.mp4";
+        Media media4 = new Media(new File(path4).toURI().toString());  
+        mediaPlayer4 = new MediaPlayer(media4);  
+        MediaView mediaView4 = new MediaView(mediaPlayer4);  
+        root4.getChildren().add(mediaView4); 
+
+
+        String path5 = "animations/arrested.mp4";
+        Media media5 = new Media(new File(path5).toURI().toString());  
+        mediaPlayer5 = new MediaPlayer(media5);  
+        MediaView mediaView5 = new MediaView(mediaPlayer5);  
+        root5.getChildren().add(mediaView5); 
 
         VBox beginningVBox = new VBox();
         window.setTitle("English Project");
@@ -248,13 +272,25 @@ public class App extends Application {
                 dingDong();
             });
         }
+        if (progressInt == 4) {
+            animation.setOnFinished(e -> {
+                progressInt++;
+                dialogueMethod();
+            });
+        }
+        if (progressInt == 10 && openletter) {
+            animation.setOnFinished(e -> {
+                progressInt++;
+                dialogueMethod();
+            });
+        }
         animation.play();
     }
     public void dialogueMethod() {
         if (progressInt == 2) {
             mediaPlayer.stop();
             mediaPlayer2.play();
-            mediaPlayer2.setRate(1.5);
+            mediaPlayer2.setRate(1.8);
             startScreenLayout.setCenter(root2);
             animate("You walk to the door and see a letter.");
         }
@@ -292,6 +328,25 @@ public class App extends Application {
         }
         else if (progressInt > 7 && progressInt < 10 && openletter) {
             animate("...");
+        }
+        else if (progressInt == 8 && dontopenletter) {
+            fade.setOnFinished(e -> {
+                startScreenLayout.setBottom(null);
+                startScreenLayout.setCenter(root5);
+                mediaPlayer5.play();
+                mediaPlayer5.setRate(1.35);
+                mediaPlayer5.setOnEndOfMedia(() -> {
+                    fade2.play();
+                });    
+                knock();
+                ft.play();
+            });
+            fade2.setOnFinished(e -> {
+                ft.play();
+                startScreenLayout.setCenter(letterImage);
+                letterImageView.setImage(arrestedImage);
+            });
+            fade.play(); 
         }
         else if (progressInt == 10 && openletter) {
             animate("...what do I do?");
@@ -363,10 +418,14 @@ public class App extends Application {
         //whatever
     }
     public void dontOpenLetter() {
-
-        startScreenLayout.setCenter(root2);
-        talker.setText("Narrator");
-        animate("You throw the letter into the trash bin.");
+        startScreenLayout.setCenter(root4);
+        mediaPlayer4.setOnEndOfMedia(() -> {
+            progressInt++;
+            dialogueMethod();
+        });    
+        mediaPlayer4.play();
+        mediaPlayer4.setRate(1.5);
+        startScreenLayout.setBottom(null);
     }
     public void openLetter() {
         talker.setText("Narrator");
@@ -443,7 +502,7 @@ public class App extends Application {
         String s = "sounds/opening.mp3";
         Media h = new Media(Paths.get(s).toUri().toString());
         soundEffectMediaPlayer = new MediaPlayer(h);
-        soundEffectMediaPlayer.setVolume(0.3);
+        soundEffectMediaPlayer.setVolume(0.2);
         soundEffectMediaPlayer.play();
     }
 
