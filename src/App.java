@@ -56,6 +56,8 @@ public class App extends Application {
     Image letter; 
     Image letter2; 
     Image arrestedImage;
+    Image silentImage;
+    Image talkingImage;
     Group root2 = new Group(); 
     Group root3 = new Group(); 
     Group root4 = new Group(); 
@@ -63,6 +65,7 @@ public class App extends Application {
     ImageView letterImageView = new ImageView();
     FadeTransition fade = new FadeTransition(); 
     FadeTransition fade2 = new FadeTransition(); 
+    FadeTransition fade3 = new FadeTransition();
     FadeTransition ft = new FadeTransition(Duration.millis(1000));
     public static void main(String[] args) {
         launch(args);
@@ -77,6 +80,10 @@ public class App extends Application {
         fade2.setFromValue(10);  
         fade2.setToValue(0.1);  
         fade2.setCycleCount(1); 
+        fade3.setDuration(Duration.millis(1000));   
+        fade3.setFromValue(10);  
+        fade3.setToValue(0.1);  
+        fade3.setCycleCount(1); 
         ft.setFromValue(0.1);
         ft.setToValue(10);
         Font font = Font.loadFont("file:font.ttf", 35);
@@ -103,6 +110,8 @@ public class App extends Application {
         letter = new Image(new FileInputStream("images/letter.png"));
         letter2 = new Image(new FileInputStream("images/openedletter.png"));
         arrestedImage = new Image(new FileInputStream("images/arrested.png"));
+        silentImage = new Image(new FileInputStream("images/silence.png"));
+        talkingImage = new Image(new FileInputStream("images/talk.png"));
         letterImageView.setX(50);
         letterImageView.setY(25);
         letterImageView.setFitHeight(2120);
@@ -225,7 +234,7 @@ public class App extends Application {
                     welcomeText.setText("Hi " + name + ".");
             }
             }
-            if (e.getCode() == KeyCode.SPACE) {
+            if (e.getCode() == KeyCode.SPACE && isHappening()) {
                 progressInt++;
                 dialogueMethod();
             }
@@ -252,9 +261,10 @@ public class App extends Application {
     // if DONT TALK: just stay sitting in silence and fade out
     // DECISION 4: rescue or run away
     // if GO TO SAFETY: 
+    Animation animation;
 
     public void animate(String content) {
-        Animation animation = new Transition() {
+        animation = new Transition() {
             {
                 setCycleDuration(Duration.millis(2500));
             }
@@ -284,7 +294,27 @@ public class App extends Application {
                 dialogueMethod();
             });
         }
+        if (progressInt == 14 && gotToWarBool) {
+            animation.setOnFinished(e -> {
+                progressInt++;
+                dialogueMethod();
+            });
+        }
         animation.play();
+    }
+    boolean decisionScreen = false;
+    public boolean isHappening() {
+        boolean playing2 = mediaPlayer3.getStatus().equals(Status.PLAYING);
+        boolean playing3 = mediaPlayer4.getStatus().equals(Status.PLAYING);
+        boolean playing4 = mediaPlayer5.getStatus().equals(Status.PLAYING);
+        // if (playing1 == false || playing2 == false || playing3 == false || playing4 == false || playing5 == false)
+        //     playing = true;
+        if (ft.getCurrentRate()!=0.0d || fade.getCurrentRate()!=0.0d || animation.getCurrentRate()!=0.0d || decisionScreen == true || playing2 == true || playing3 == true || playing4 == true)
+            return false;
+        else if ((progressInt == 6 && soundEffectMediaPlayer.getStatus().equals(Status.PLAYING) == false))
+            return false;
+        else 
+            return true;
     }
     public void dialogueMethod() {
         if (progressInt == 2) {
@@ -295,8 +325,8 @@ public class App extends Application {
             animate("You walk to the door and see a letter.");
         }
         else if (progressInt == 3) {
-            talker.setText("");
-            animate("");
+            talker.setText("Narrator");
+            animate("You pick up the letter.");
             startScreenLayout.setCenter(letterImage);
         }
         else if (progressInt == 4) {
@@ -317,8 +347,16 @@ public class App extends Application {
             animate("");
             startScreenLayout.setCenter(letterImage);
             startScreenLayout.setBottom(vDBox);
-            if (openletter)
+            if (openletter) {
                 letterOpening();
+                if (progressInt == 6) {
+                    soundEffectMediaPlayer.setOnEndOfMedia(() -> {
+                        progressInt++;
+                        dialogueMethod();
+                    });   
+                }
+            }
+                
         }
         else if (progressInt == 7 && openletter) {
             openLetter();
@@ -360,10 +398,38 @@ public class App extends Application {
             });
             fade.play();  
         }
+        else if (progressInt == 12 && gotToWarBool) {
+            startScreenLayout.setBottom(vDBox);
+            talker.setText("");
+            animate("*crickets*");
+        }
+        else if (progressInt == 13 && gotToWarBool) {
+            talker.setText("Narrator");
+            animate("The night is dark and the air is filled with distant hollers, no one dare utter a word.");
+        }
+        else if (progressInt == 14 && gotToWarBool) {
+            talker.setText("You (" + name + ")");
+            animate("Should i say something?");
+        }
+        else if (progressInt == 15 && gotToWarBool) {
+            ft.setOnFinished(e -> {
+                soundEffectMediaPlayer.stop();
+                soundEffectMediaPlayer.setCycleCount(1);
+            });
+            fade.setOnFinished(e -> {
+                decision("Talk", "Don't Talk");
+                ft.play();
+            });
+            fade.play();  
+        }
     }
     boolean dontopenletter;
     boolean openletter;
+    boolean gotToWarBool;
+    boolean talkbool;
+    boolean donttalkbool;
     public void decision(String choice1, String choice2) {
+        decisionScreen = true;
         decisionHBox.getChildren().clear();
         Button choice1Button = new Button(choice1);
         Button choice2Button = new Button(choice2);
@@ -380,11 +446,13 @@ public class App extends Application {
         startScreenLayout.setCenter(decisionHBox);
         if (progressInt == 5) {
             choice1Button.setOnAction(e -> {
+                decisionScreen = false;
                 openletter = true;
                 progressInt++;
                 dialogueMethod();
             });
             choice2Button.setOnAction(e -> {
+                decisionScreen = false;
                 dontopenletter = true;
                 progressInt++;
                 dialogueMethod();
@@ -392,11 +460,28 @@ public class App extends Application {
         }
         if (progressInt == 11) {
             choice1Button.setOnAction(e -> {
+                decisionScreen = false;
                 dodgeDraft();
             });
             choice2Button.setOnAction(e -> {
+                gotToWarBool = true;
+                decisionScreen = false;
+                GoToWar();
             });
         }
+        if (progressInt == 15) {
+            choice1Button.setOnAction(e -> {
+                talkbool = true;
+                decisionScreen = false;
+                talk();
+            });
+            choice2Button.setOnAction(e -> {
+                donttalkbool = true;
+                decisionScreen = false;
+                dontTalk();
+            });
+        }
+
     }
     public void playAnimation(String animationName) {
 
@@ -433,7 +518,16 @@ public class App extends Application {
         animate("You open the letter.");
     }
     public void GoToWar() {
-
+        ft.setOnFinished(e -> {
+            crickets();
+        });
+        fade3.setOnFinished(e -> {
+            ft.play();
+            startScreenLayout.setCenter(letterImage);
+            letterImageView.setImage(silentImage);
+            startScreenLayout.setBottom(null);
+        });
+        fade3.play();
         addSadPoints(4);
     }
     public void dodgeDraft() {
@@ -443,11 +537,28 @@ public class App extends Application {
         startScreenLayout.setBottom(null);
     }
     public void talk() {
-
+        ft.setOnFinished(e -> {
+        });
+        fade3.setOnFinished(e -> {
+            ft.play();
+            startScreenLayout.setCenter(letterImage);
+            letterImageView.setImage(talkingImage);
+            startScreenLayout.setBottom(null);
+        });
+        fade3.play();
         addSadPoints(-2);
     }
     public void dontTalk() {
-
+        ft.setOnFinished(e -> {
+            crickets();
+        });
+        fade3.setOnFinished(e -> {
+            ft.play();
+            startScreenLayout.setCenter(letterImage);
+            letterImageView.setImage(silentImage);
+            startScreenLayout.setBottom(null);
+        });
+        fade3.play();
     }
     public void goToSafety() {
 
@@ -503,6 +614,15 @@ public class App extends Application {
         Media h = new Media(Paths.get(s).toUri().toString());
         soundEffectMediaPlayer = new MediaPlayer(h);
         soundEffectMediaPlayer.setVolume(0.2);
+        soundEffectMediaPlayer.play();
+    }
+
+    public void crickets() {
+        String s = "sounds/crickets.mp3";
+        Media h = new Media(Paths.get(s).toUri().toString());
+        soundEffectMediaPlayer = new MediaPlayer(h);
+        soundEffectMediaPlayer.setVolume(0.1);
+        soundEffectMediaPlayer.setCycleCount(MediaPlayer.INDEFINITE);
         soundEffectMediaPlayer.play();
     }
 
