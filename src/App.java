@@ -282,6 +282,11 @@ public class App extends Application {
                 dingDong();
             });
         }
+        if (progressInt == 3) {
+            animation.setOnFinished(e -> {
+                startScreenLayout.setCenter(letterImage);
+            });
+        }
         if (progressInt == 4) {
             animation.setOnFinished(e -> {
                 progressInt++;
@@ -327,7 +332,6 @@ public class App extends Application {
         else if (progressInt == 3) {
             talker.setText("Narrator");
             animate("You pick up the letter.");
-            startScreenLayout.setCenter(letterImage);
         }
         else if (progressInt == 4) {
             talker.setText("You (" + name + ")");
