@@ -580,6 +580,7 @@ public class App extends Application {
         startScreenLayout.setCenter(root3);
         mediaPlayer3.play();
         mediaPlayer3.setRate(1.5);
+        musicMediaPlayer.pause();
         emotional();
         startScreenLayout.setBottom(null);
     }
