@@ -617,7 +617,7 @@ public class App extends Application {
     }
 
     public void ding() {
-        String s = "sounds/sadDing.mp3";
+        String s = "sounds/ding.mp3";
         Media h = new Media(Paths.get(s).toUri().toString());
         dingMediaPlayer = new MediaPlayer(h);
         dingMediaPlayer.setVolume(0.1);
@@ -626,7 +626,7 @@ public class App extends Application {
     }
 
     public void happyDing() {
-        String s = "sounds/ding.mp3";
+        String s = "sounds/reverseDing.mp3";
         Media h = new Media(Paths.get(s).toUri().toString());
         dingMediaPlayer = new MediaPlayer(h);
         dingMediaPlayer.setVolume(0.1);
