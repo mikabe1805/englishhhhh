@@ -237,7 +237,12 @@ public class App extends Application {
                     beginningVBox.getChildren().clear();
                     beginningVBox.getChildren().addAll(titleText, welcomeText, playButton);
                     name = nameTextField.getText();
-                    welcomeText.setText("Hi " + name + ".");
+                    if (!name.equals("steve")) {
+                        welcomeText.setText("Hi " + name + ".");
+                    } else {
+                        welcomeText.setText(";)");
+                    }
+                    
             }
             }
             if (e.getCode() == KeyCode.SPACE && isHappening()) {
