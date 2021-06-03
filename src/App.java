@@ -33,6 +33,8 @@ import java.io.FileInputStream;
 import java.nio.file.Paths;
 import javafx.animation.Animation;
 import javafx.animation.FadeTransition;
+import javafx.animation.KeyFrame;
+import javafx.animation.Timeline;
 public class App extends Application {
     Stage window;
     private int decision;
@@ -47,11 +49,15 @@ public class App extends Application {
     int progressInt = 0;
     MediaPlayer soundEffectMediaPlayer;
     String text;
+    Label sadText = new Label("Sad Points: 0");
     MediaPlayer mediaPlayer;
     MediaPlayer mediaPlayer2;
     MediaPlayer mediaPlayer3;
     MediaPlayer mediaPlayer4;
     MediaPlayer mediaPlayer5;
+    MediaPlayer dingMediaPlayer;
+    MediaPlayer musicMediaPlayer;
+    MediaPlayer decisionMusicMediaPlayer;
     Group letterImage;
     Image letter; 
     Image letter2; 
@@ -179,7 +185,6 @@ public class App extends Application {
         beginningHBox.setSpacing(200);
 
 
-        Label sadText = new Label("Sad Points: 0");
         sadText.setFont(font);
 
         dialogue = new Label();
@@ -209,6 +214,7 @@ public class App extends Application {
         scene = new Scene(startScreenLayout, 1280, 720);
         window.setScene(scene);
         window.show();
+        music();
 
         playButton.setOnAction(e -> {
             progressInt = 1;
@@ -314,7 +320,7 @@ public class App extends Application {
         boolean playing4 = mediaPlayer5.getStatus().equals(Status.PLAYING);
         // if (playing1 == false || playing2 == false || playing3 == false || playing4 == false || playing5 == false)
         //     playing = true;
-        if (ft.getCurrentRate()!=0.0d || fade.getCurrentRate()!=0.0d || animation.getCurrentRate()!=0.0d || decisionScreen == true || playing2 == true || playing3 == true || playing4 == true)
+        if (ft.getCurrentRate()!=0.0d || fade.getCurrentRate()!=0.0d || animation.getCurrentRate()!=0.0d || animationSad.getCurrentRate()!=0.0d || animationHappy.getCurrentRate()!=0.0d || decisionScreen == true || playing2 == true || playing3 == true || playing4 == true)
             return false;
         else if ((progressInt == 6 && soundEffectMediaPlayer.getStatus().equals(Status.PLAYING) == false))
             return false;
@@ -341,6 +347,8 @@ public class App extends Application {
             fade.setNode(startScreenLayout); 
             ft.setNode(startScreenLayout);
             fade.setOnFinished(e -> {
+                decisionMusic();
+                musicMediaPlayer.pause();
                 decision("Open the Letter", "Don't Open the Letter");
                 ft.play();
             });
@@ -397,6 +405,8 @@ public class App extends Application {
             fade.setNode(startScreenLayout); 
             ft.setNode(startScreenLayout);
             fade.setOnFinished(e -> {
+                decisionMusic();
+                musicMediaPlayer.pause();
                 decision("Dodge the Draft", "Go to War");
                 ft.play();
             });
@@ -405,7 +415,7 @@ public class App extends Application {
         else if (progressInt == 12 && gotToWarBool) {
             startScreenLayout.setBottom(vDBox);
             talker.setText("");
-            animate("*crickets*");
+            animate("*chatter*");
         }
         else if (progressInt == 13 && gotToWarBool) {
             talker.setText("Narrator");
@@ -421,6 +431,8 @@ public class App extends Application {
                 soundEffectMediaPlayer.setCycleCount(1);
             });
             fade.setOnFinished(e -> {
+                decisionMusic();
+                musicMediaPlayer.pause();
                 decision("Talk", "Don't Talk");
                 ft.play();
             });
@@ -450,12 +462,16 @@ public class App extends Application {
         startScreenLayout.setCenter(decisionHBox);
         if (progressInt == 5) {
             choice1Button.setOnAction(e -> {
+                decisionMusicMediaPlayer.stop();
+                musicMediaPlayer.play();
                 decisionScreen = false;
                 openletter = true;
                 progressInt++;
                 dialogueMethod();
             });
             choice2Button.setOnAction(e -> {
+                decisionMusicMediaPlayer.stop();
+                musicMediaPlayer.play();
                 decisionScreen = false;
                 dontopenletter = true;
                 progressInt++;
@@ -464,10 +480,14 @@ public class App extends Application {
         }
         if (progressInt == 11) {
             choice1Button.setOnAction(e -> {
+                decisionMusicMediaPlayer.stop();
+                musicMediaPlayer.play();
                 decisionScreen = false;
                 dodgeDraft();
             });
             choice2Button.setOnAction(e -> {
+                decisionMusicMediaPlayer.stop();
+                musicMediaPlayer.play();
                 gotToWarBool = true;
                 decisionScreen = false;
                 GoToWar();
@@ -475,11 +495,15 @@ public class App extends Application {
         }
         if (progressInt == 15) {
             choice1Button.setOnAction(e -> {
+                decisionMusicMediaPlayer.stop();
+                musicMediaPlayer.play();
                 talkbool = true;
                 decisionScreen = false;
                 talk();
             });
             choice2Button.setOnAction(e -> {
+                decisionMusicMediaPlayer.stop();
+                musicMediaPlayer.play();
                 donttalkbool = true;
                 decisionScreen = false;
                 dontTalk();
@@ -487,19 +511,36 @@ public class App extends Application {
         }
 
     }
-    public void playAnimation(String animationName) {
+    
+    int countDown;
+    Timeline animationSad = new Timeline(new KeyFrame(Duration.millis(2500), e -> {
+        if (countDown > 0) {
+            countDown--;
+            sadPoints+=1;
+            sadText.setText("Sad Points: " + sadPoints);
+            ding();
+        }
+    }));
 
-        // enter code for playing animation
-    }
-    public void walk(String image1name, String image2name) {
-
-        // alternate between image 1 and image 2
-    }
+    Timeline animationHappy = new Timeline(new KeyFrame(Duration.millis(2000), e -> {
+        if (countDown < 0) {
+            countDown++;
+            sadPoints-=1;
+            sadText.setText("Sad Points: " + sadPoints);
+            happyDing();
+        }
+    }));
 
     public void addSadPoints(int amount) {
-        sadPoints+=amount;
-        // animate numbers going up and call ding() after each one
-        // make it add sad points 1 by 1 and play a ding sound
+        countDown = amount;
+        if (amount > 0) {
+            animationSad.setCycleCount(amount);
+            animationSad.play();
+        }
+        else {
+            animationHappy.setCycleCount(amount*-1);
+            animationHappy.play();
+        }
     }
 
     public void relaxingSequence() {
@@ -520,6 +561,7 @@ public class App extends Application {
         talker.setText("Narrator");
         letterImageView.setImage(letter2);
         animate("You open the letter.");
+        addSadPoints(4);
     }
     public void GoToWar() {
         ft.setOnFinished(e -> {
@@ -538,6 +580,7 @@ public class App extends Application {
         startScreenLayout.setCenter(root3);
         mediaPlayer3.play();
         mediaPlayer3.setRate(1.5);
+        emotional();
         startScreenLayout.setBottom(null);
     }
     public void talk() {
@@ -574,11 +617,21 @@ public class App extends Application {
     }
 
     public void ding() {
+        String s = "sounds/sadDing.mp3";
+        Media h = new Media(Paths.get(s).toUri().toString());
+        dingMediaPlayer = new MediaPlayer(h);
+        dingMediaPlayer.setVolume(0.1);
+        dingMediaPlayer.setRate(1.2);
+        dingMediaPlayer.play();
+    }
+
+    public void happyDing() {
         String s = "sounds/ding.mp3";
         Media h = new Media(Paths.get(s).toUri().toString());
-        soundEffectMediaPlayer = new MediaPlayer(h);
-        soundEffectMediaPlayer.setVolume(0.1);
-        soundEffectMediaPlayer.play();
+        dingMediaPlayer = new MediaPlayer(h);
+        dingMediaPlayer.setVolume(0.1);
+        dingMediaPlayer.setRate(1.2);
+        dingMediaPlayer.play();
     }
 
     public void dingDong() {
@@ -627,6 +680,32 @@ public class App extends Application {
         soundEffectMediaPlayer = new MediaPlayer(h);
         soundEffectMediaPlayer.setVolume(0.1);
         soundEffectMediaPlayer.setCycleCount(MediaPlayer.INDEFINITE);
+        soundEffectMediaPlayer.play();
+    }
+
+    public void music() {
+        String s = "sounds/bgm.mp3";
+        Media h = new Media(Paths.get(s).toUri().toString());
+        musicMediaPlayer = new MediaPlayer(h);
+        musicMediaPlayer.setVolume(0.1);
+        musicMediaPlayer.setCycleCount(MediaPlayer.INDEFINITE);
+        musicMediaPlayer.play();
+    }
+
+    public void decisionMusic() {
+        String s = "sounds/dm.mp3";
+        Media h = new Media(Paths.get(s).toUri().toString());
+        decisionMusicMediaPlayer = new MediaPlayer(h);
+        decisionMusicMediaPlayer.setVolume(0.1);
+        decisionMusicMediaPlayer.setCycleCount(MediaPlayer.INDEFINITE);
+        decisionMusicMediaPlayer.play();
+    }
+
+    public void emotional() {
+        String s = "sounds/emotional.mp3";
+        Media h = new Media(Paths.get(s).toUri().toString());
+        soundEffectMediaPlayer = new MediaPlayer(h);
+        soundEffectMediaPlayer.setVolume(0.1);
         soundEffectMediaPlayer.play();
     }
 
