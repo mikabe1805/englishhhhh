@@ -31,6 +31,8 @@ import javafx.util.Duration;
 import java.io.File;
 import java.io.FileInputStream;
 import java.nio.file.Paths;
+import java.util.concurrent.TimeUnit;
+
 import javafx.animation.Animation;
 import javafx.animation.FadeTransition;
 import javafx.animation.KeyFrame;
@@ -58,17 +60,21 @@ public class App extends Application {
     MediaPlayer dingMediaPlayer;
     MediaPlayer musicMediaPlayer;
     MediaPlayer decisionMusicMediaPlayer;
+    VBox gameOverBox = new VBox();
     Group letterImage;
     Image letter; 
     Image letter2; 
     Image arrestedImage;
     Image silentImage;
     Image talkingImage;
+    Image gameOverImage;
     Group root2 = new Group(); 
     Group root3 = new Group(); 
     Group root4 = new Group(); 
     Group root5 = new Group(); 
+    Group gameOver = new Group();
     ImageView letterImageView = new ImageView();
+    ImageView gameOverImageView = new ImageView();
     FadeTransition fade = new FadeTransition(); 
     FadeTransition fade2 = new FadeTransition(); 
     FadeTransition fade3 = new FadeTransition();
@@ -118,6 +124,7 @@ public class App extends Application {
         arrestedImage = new Image(new FileInputStream("images/arrested.png"));
         silentImage = new Image(new FileInputStream("images/silence.png"));
         talkingImage = new Image(new FileInputStream("images/talk.png"));
+        gameOverImage = new Image(new FileInputStream("images/gameover.png"));
         letterImageView.setX(50);
         letterImageView.setY(25);
         letterImageView.setFitHeight(2120);
@@ -125,6 +132,14 @@ public class App extends Application {
         letterImageView.setPreserveRatio(true);
         letterImage = new Group(letterImageView);
         letterImageView.setImage(letter);
+
+        gameOverImageView.setX(50);
+        gameOverImageView.setY(25);
+        gameOverImageView.setFitHeight(1000);
+        gameOverImageView.setFitWidth(600); 
+        gameOverImageView.setPreserveRatio(true);
+        gameOver = new Group(gameOverImageView);
+        gameOverImageView.setImage(gameOverImage);
 
         String path = "animations/beginning.mp4";  
         Media media = new Media(new File(path).toURI().toString());  
@@ -203,6 +218,13 @@ public class App extends Application {
         vDBox.getChildren().addAll(talkerBox, dBox);
         vDBox.setSpacing(20);
 
+        Button playAgainButton = new Button("Play Again");
+        playAgainButton.setStyle("-fx-font-size: 24");
+
+        gameOverBox.getChildren().addAll(gameOver, playAgainButton);
+        gameOverBox.setSpacing(20);
+        gameOverBox.setAlignment(Pos.CENTER);
+
         BorderPane.setMargin(beginningHBox, new Insets(10, 10, 10, 10));
         startScreenLayout.setCenter(beginningHBox);
         BorderPane.setMargin(startImage1, new Insets(10, 10, 10, 10));
@@ -231,18 +253,42 @@ public class App extends Application {
             animate("You're sitting at home relaxing when suddenly the doorbell rings...");
         });
 
+        playAgainButton.setOnAction(e -> {
+            dontopenletter = false;
+            openletter = false;
+            gotToWarBool = false;
+            talkbool = false;
+            donttalkbool = false;
+            mediaPlayer.stop();
+            mediaPlayer2.stop();
+            mediaPlayer3.stop();
+            mediaPlayer4.stop();
+            mediaPlayer5.stop();
+            nameTextField.setText("");
+            sadPoints = 0;
+            progressInt = 0;
+            dialogue.setText("");
+            beginningHBox.getChildren().remove(sadText);
+            beginningVBox.getChildren().addAll(nameTextField, nameText);
+            startScreenLayout.setTop(null);
+            startScreenLayout.setLeft(startImage1);
+            startScreenLayout.setRight(startImage2);
+            startScreenLayout.setBottom(vDBox);
+            startScreenLayout.setCenter(beginningHBox);
+            beginningHBox.setPadding(new Insets(10,10,10,10));
+        });
+
         scene.setOnKeyPressed(e -> {
             if (e.getCode() == KeyCode.ENTER) {
                 if (progressInt == 0) {
                     beginningVBox.getChildren().clear();
                     beginningVBox.getChildren().addAll(titleText, welcomeText, playButton);
                     name = nameTextField.getText();
-                    if (!name.equals("steve")) {
+                    if (!name.equals("Steve") && !name.equals("steve")) {
                         welcomeText.setText("Hi " + name + ".");
                     } else {
                         welcomeText.setText(";)");
                     }
-                    
             }
             }
             if (e.getCode() == KeyCode.SPACE && isHappening()) {
@@ -290,11 +336,12 @@ public class App extends Application {
         // use .setOnFinished to make something happen only after the animation finishes
         if (progressInt == 1) {
             animation.setOnFinished(e -> {
-                dingDong();
+                dingDong(); 
             });
         }
         if (progressInt == 3) {
             animation.setOnFinished(e -> {
+                letterImageView.setImage(letter);
                 startScreenLayout.setCenter(letterImage);
             });
         }
@@ -399,6 +446,12 @@ public class App extends Application {
                     ft.play();
                     startScreenLayout.setCenter(letterImage);
                     letterImageView.setImage(arrestedImage);
+                    try {
+                        TimeUnit.SECONDS.sleep(2);
+                    } catch (InterruptedException ie) {
+                        Thread.currentThread().interrupt();
+                    }
+                    gameOverMethod();
                 });
                 fade.play(); 
             }
@@ -602,6 +655,7 @@ public class App extends Application {
         musicMediaPlayer.pause();
         emotional();
         startScreenLayout.setBottom(null);
+        mediaPlayer3.setOnEndOfMedia(() -> gameOverMethod());
     }
     public void talk() {
         ft.setOnFinished(e -> {
@@ -636,6 +690,14 @@ public class App extends Application {
         }
     }
 
+    public void gameOverMethod() {
+        ft.setOnFinished(e -> {});
+        fade.setOnFinished(e -> {
+            startScreenLayout.setCenter(gameOverBox);
+            ft.play();
+        });
+        fade.play();
+    }
     public void ding() {
         String s = "sounds/ding.mp3";
         Media h = new Media(Paths.get(s).toUri().toString());
