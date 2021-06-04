@@ -237,7 +237,12 @@ public class App extends Application {
                     beginningVBox.getChildren().clear();
                     beginningVBox.getChildren().addAll(titleText, welcomeText, playButton);
                     name = nameTextField.getText();
-                    welcomeText.setText("Hi " + name + ".");
+                    if (!name.equals("steve")) {
+                        welcomeText.setText("Hi " + name + ".");
+                    } else {
+                        welcomeText.setText(";)");
+                    }
+                    
             }
             }
             if (e.getCode() == KeyCode.SPACE && isHappening()) {
@@ -328,115 +333,120 @@ public class App extends Application {
             return true;
     }
     public void dialogueMethod() {
-        if (progressInt == 2) {
-            mediaPlayer.stop();
-            mediaPlayer2.play();
-            mediaPlayer2.setRate(1.8);
-            startScreenLayout.setCenter(root2);
-            animate("You walk to the door and see a letter.");
-        }
-        else if (progressInt == 3) {
-            talker.setText("Narrator");
-            animate("You pick up the letter.");
-        }
-        else if (progressInt == 4) {
-            talker.setText("You (" + name + ")");
-            animate("Oh no...");
-        }
-        else if (progressInt == 5) {
-            fade.setNode(startScreenLayout); 
-            ft.setNode(startScreenLayout);
-            fade.setOnFinished(e -> {
-                decisionMusic();
-                musicMediaPlayer.pause();
-                decision("Open the Letter", "Don't Open the Letter");
-                ft.play();
-            });
-            fade.play();  
-        }
-        else if (progressInt == 6) {
-            talker.setText("");
-            animate("");
-            startScreenLayout.setCenter(letterImage);
-            startScreenLayout.setBottom(vDBox);
-            if (openletter) {
-                letterOpening();
-                if (progressInt == 6) {
-                    soundEffectMediaPlayer.setOnEndOfMedia(() -> {
-                        progressInt++;
-                        dialogueMethod();
-                    });   
-                }
-            }
-                
-        }
-        else if (progressInt == 7 && openletter) {
-            openLetter();
-        }
-        else if (progressInt == 7 && dontopenletter) {
-            dontOpenLetter();
-        }
-        else if (progressInt > 7 && progressInt < 10 && openletter) {
-            animate("...");
-        }
-        else if (progressInt == 8 && dontopenletter) {
-            fade.setOnFinished(e -> {
-                startScreenLayout.setBottom(null);
-                startScreenLayout.setCenter(root5);
-                mediaPlayer5.play();
-                mediaPlayer5.setRate(1.35);
-                mediaPlayer5.setOnEndOfMedia(() -> {
-                    fade2.play();
-                });    
-                knock();
-                ft.play();
-            });
-            fade2.setOnFinished(e -> {
-                ft.play();
+        switch (progressInt) {
+            case 2: 
+                mediaPlayer.stop();
+                mediaPlayer2.play();
+                mediaPlayer2.setRate(1.8);
+                startScreenLayout.setCenter(root2);
+                animate("You walk to the door and see a letter.");
+                break;
+            case 3:
+                talker.setText("Narrator");
+                animate("You pick up the letter.");
+                break;
+            case 4:
+                talker.setText("You (" + name + ")");
+                animate("Oh no...");
+                break;
+            case 5:
+                fade.setNode(startScreenLayout); 
+                ft.setNode(startScreenLayout);
+                fade.setOnFinished(e -> {
+                    decisionMusic();
+                    musicMediaPlayer.pause();
+                    decision("Open the Letter", "Don't Open the Letter");
+                    ft.play();
+                });
+                fade.play();  
+                break;
+            case 6:
+                talker.setText("");
+                animate("");
                 startScreenLayout.setCenter(letterImage);
-                letterImageView.setImage(arrestedImage);
-            });
-            fade.play(); 
-        }
-        else if (progressInt == 10 && openletter) {
-            animate("...what do I do?");
-        }
-        else if (progressInt == 11 && openletter) {
-            fade.setNode(startScreenLayout); 
-            ft.setNode(startScreenLayout);
-            fade.setOnFinished(e -> {
-                decisionMusic();
-                musicMediaPlayer.pause();
-                decision("Dodge the Draft", "Go to War");
-                ft.play();
-            });
-            fade.play();  
-        }
-        else if (progressInt == 12 && gotToWarBool) {
-            startScreenLayout.setBottom(vDBox);
-            talker.setText("");
-            animate("*chatter*");
-        }
-        else if (progressInt == 13 && gotToWarBool) {
-            talker.setText("Narrator");
-            animate("The night is dark and the air is filled with distant hollers, no one dare utter a word.");
-        }
-        else if (progressInt == 14 && gotToWarBool) {
-            talker.setText("You (" + name + ")");
-            animate("Should i say something?");
-        }
-        else if (progressInt == 15 && gotToWarBool) {
-            ft.setOnFinished(e -> {
-                soundEffectMediaPlayer.stop();
-                soundEffectMediaPlayer.setCycleCount(1);
-            });
-            fade.setOnFinished(e -> {
-                decisionMusic();
-                musicMediaPlayer.pause();
-                decision("Talk", "Don't Talk");
-                ft.play();
-            });
-            fade.play();  
+                startScreenLayout.setBottom(vDBox);
+                if (openletter) {
+                    letterOpening();
+                    if (progressInt == 6) {
+                        soundEffectMediaPlayer.setOnEndOfMedia(() -> {
+                            progressInt++;
+                            dialogueMethod();
+                        });   
+                    }
+                }
+                break;
+            case 7: 
+                if (openletter){
+                    openLetter();
+                } else {
+                    dontOpenLetter();
+                }
+                break;
+            case 8:
+            if (dontopenletter) {
+                fade.setOnFinished(e -> {
+                    startScreenLayout.setBottom(null);
+                    startScreenLayout.setCenter(root5);
+                    mediaPlayer5.play();
+                    mediaPlayer5.setRate(1.35);
+                    mediaPlayer5.setOnEndOfMedia(() -> {
+                        fade2.play();
+                    });    
+                    knock();
+                    ft.play();
+                });
+                fade2.setOnFinished(e -> {
+                    ft.play();
+                    startScreenLayout.setCenter(letterImage);
+                    letterImageView.setImage(arrestedImage);
+                });
+                fade.play(); 
+            }
+            case 9:
+                animate("...");
+                break;
+            
+            case 10:
+                animate("...what do I do?");
+                break;
+            case 11:
+                fade.setNode(startScreenLayout); 
+                ft.setNode(startScreenLayout);
+                fade.setOnFinished(e -> {
+                    decisionMusic();
+                    musicMediaPlayer.pause();
+                    decision("Dodge the Draft", "Go to War");
+                    ft.play();
+                });
+                fade.play();  
+                break;
+
+            case 12:
+                startScreenLayout.setBottom(vDBox);
+                talker.setText("");
+                animate("*silence*");
+                break;
+            case 13:
+                talker.setText("Narrator");
+                animate("The night is dark and the air is filled with distant hollers, no one dare utter a word.");
+                break;
+            case 14:
+                talker.setText("You (" + name + ")");
+                animate("Should i say something?");
+                break;
+            case 15:
+                ft.setOnFinished(e -> {
+                    soundEffectMediaPlayer.stop();
+                    soundEffectMediaPlayer.setCycleCount(1);
+                });
+                fade.setOnFinished(e -> {
+                    decisionMusic();
+                    musicMediaPlayer.pause();
+                    decision("Talk", "Don't Talk");
+                    ft.play();
+                });
+                fade.play();  
+                break;
         }
     }
     boolean dontopenletter;
@@ -481,7 +491,7 @@ public class App extends Application {
         if (progressInt == 11) {
             choice1Button.setOnAction(e -> {
                 decisionMusicMediaPlayer.stop();
-                musicMediaPlayer.play();
+                musicMediaPlayer.stop();
                 decisionScreen = false;
                 dodgeDraft();
             });
@@ -513,7 +523,7 @@ public class App extends Application {
     }
     
     int countDown;
-    Timeline animationSad = new Timeline(new KeyFrame(Duration.millis(2500), e -> {
+    Timeline animationSad = new Timeline(new KeyFrame(Duration.millis(600), e -> {
         if (countDown > 0) {
             countDown--;
             sadPoints+=1;
@@ -522,7 +532,16 @@ public class App extends Application {
         }
     }));
 
-    Timeline animationHappy = new Timeline(new KeyFrame(Duration.millis(2000), e -> {
+    Timeline animationReallySad = new Timeline(new KeyFrame(Duration.millis(50), e -> {
+        if (countDown > 0) {
+            countDown--;
+            sadPoints+=1;
+            sadText.setText("Sad Points: " + sadPoints);
+            ding();
+        }
+    }));
+
+    Timeline animationHappy = new Timeline(new KeyFrame(Duration.millis(1000), e -> {
         if (countDown < 0) {
             countDown++;
             sadPoints-=1;
@@ -561,7 +580,7 @@ public class App extends Application {
         talker.setText("Narrator");
         letterImageView.setImage(letter2);
         animate("You open the letter.");
-        addSadPoints(4);
+        addSadPoints(2);
     }
     public void GoToWar() {
         ft.setOnFinished(e -> {
@@ -573,8 +592,8 @@ public class App extends Application {
             letterImageView.setImage(silentImage);
             startScreenLayout.setBottom(null);
         });
-        fade3.play();
         addSadPoints(4);
+        fade3.play();
     }
     public void dodgeDraft() {
         startScreenLayout.setCenter(root3);
@@ -593,8 +612,8 @@ public class App extends Application {
             letterImageView.setImage(talkingImage);
             startScreenLayout.setBottom(null);
         });
-        fade3.play();
         addSadPoints(-2);
+        fade3.play();
     }
     public void dontTalk() {
         ft.setOnFinished(e -> {
