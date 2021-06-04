@@ -268,6 +268,7 @@ public class App extends Application {
             sadPoints = 0;
             progressInt = 0;
             dialogue.setText("");
+            talker.setText("");
             beginningHBox.getChildren().remove(sadText);
             beginningVBox.getChildren().addAll(nameTextField, nameText);
             startScreenLayout.setTop(null);
