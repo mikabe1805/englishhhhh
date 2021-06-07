@@ -68,6 +68,10 @@ public class App extends Application {
     Image silentImage;
     Image talkingImage;
     Image gameOverImage;
+    Image saveOrDontImage;
+    Image saveImage;
+    Image dontSave1Image;
+    Image dontSave2Image;
     Group root2 = new Group(); 
     Group root3 = new Group(); 
     Group root4 = new Group(); 
@@ -125,6 +129,10 @@ public class App extends Application {
         silentImage = new Image(new FileInputStream("images/silence.png"));
         talkingImage = new Image(new FileInputStream("images/talk.png"));
         gameOverImage = new Image(new FileInputStream("images/gameover.png"));
+        saveOrDontImage = new Image(new FileInputStream("images/saveordont.png"));
+        saveImage = new Image(new FileInputStream("images/save.png"));
+        dontSave1Image = new Image(new FileInputStream("images/dontsave1.png"));
+        dontSave2Image = new Image(new FileInputStream("images/dontsave2.png"));
         letterImageView.setX(50);
         letterImageView.setY(25);
         letterImageView.setFitHeight(2120);
@@ -364,6 +372,19 @@ public class App extends Application {
                 dialogueMethod();
             });
         }
+        if (progressInt == 18) {
+            ft.setOnFinished(e -> {
+            });
+            fade.setOnFinished(e -> {
+                ft.play();
+                startScreenLayout.setCenter(letterImage);
+                letterImageView.setImage(saveOrDontImage);
+                startScreenLayout.setBottom(null);
+            });
+            animation.setOnFinished(e -> {
+                fade.play();
+            });
+        }
         animation.play();
     }
     boolean decisionScreen = false;
@@ -501,6 +522,44 @@ public class App extends Application {
                 });
                 fade.play();  
                 break;
+            case 16:
+                if (talkbool) {
+                    talker.setText("You (" + name + ")");
+                    animate("Hey, I'm " + name + ".");
+                }
+                else {
+                    startScreenLayout.setBottom(vDBox);
+                    talker.setText("Narrator");
+                    animate("You stay silent, wondering if anyone else will say something.");
+                }
+                break;
+            case 17:
+                if (talkbool) {
+                    talker.setText("Gayry");
+                    animate("Hey " + name + ", I'm Gayry :)");
+                }
+                else {
+                    talker.setText("Lt. Homes");
+                    animate("You are one chatty group! Now, it's time to hit the hay soldiers.");
+                }
+                break;
+            case 18:
+                if (talkbool) {
+                    talker.setText("Narrator");
+                    animate("You and Gayry hit it off and get to know each other for the rest of the night before heading to sleep.");
+                }
+                else {
+                    talker.setText("Narrator");
+                    animate("Everyone scrambles to their bunks and goes to sleep.");
+                }
+                break;
+            case 19: 
+                startScreenLayout.setBottom(vDBox);
+                if (talkbool)
+                    talker.setText("Gayry");
+                else 
+                    talker.setText("Soldier who's stuck");
+                animate("HELP! PLEASE HELP ME!");
         }
     }
     boolean dontopenletter;
@@ -665,7 +724,9 @@ public class App extends Application {
             ft.play();
             startScreenLayout.setCenter(letterImage);
             letterImageView.setImage(talkingImage);
-            startScreenLayout.setBottom(null);
+            startScreenLayout.setBottom(vDBox);
+            talker.setText("Narrator");
+            animate("You talk to the guy next to you.");
         });
         addSadPoints(-2);
         fade3.play();
