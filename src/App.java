@@ -372,7 +372,7 @@ public class App extends Application {
                 dialogueMethod();
             });
         }
-        if (progressInt == 18) {
+        if (progressInt == 19) {
             ft.setOnFinished(e -> {
             });
             fade.setOnFinished(e -> {
@@ -524,16 +524,26 @@ public class App extends Application {
                 break;
             case 16:
                 if (talkbool) {
+                    talker.setText("Narrator");
+                    animate("You talk to the guy next to you.");
+                }
+                else {
+                    startScreenLayout.setBottom(vDBox);
+                    talker.setText("");
+                    animate("*silence*");
+                }
+                break;
+            case 17:
+                if (talkbool) {
                     talker.setText("You (" + name + ")");
                     animate("Hey, I'm " + name + ".");
                 }
                 else {
-                    startScreenLayout.setBottom(vDBox);
                     talker.setText("Narrator");
                     animate("You stay silent, wondering if anyone else will say something.");
                 }
                 break;
-            case 17:
+            case 18:
                 if (talkbool) {
                     talker.setText("Gayry");
                     animate("Hey " + name + ", I'm Gayry :)");
@@ -543,7 +553,7 @@ public class App extends Application {
                     animate("You are one chatty group! Now, it's time to hit the hay soldiers.");
                 }
                 break;
-            case 18:
+            case 19: 
                 if (talkbool) {
                     talker.setText("Narrator");
                     animate("You and Gayry hit it off and get to know each other for the rest of the night before heading to sleep.");
@@ -553,7 +563,7 @@ public class App extends Application {
                     animate("Everyone scrambles to their bunks and goes to sleep.");
                 }
                 break;
-            case 19: 
+            case 20: 
                 startScreenLayout.setBottom(vDBox);
                 if (talkbool)
                     talker.setText("Gayry");
@@ -725,8 +735,8 @@ public class App extends Application {
             startScreenLayout.setCenter(letterImage);
             letterImageView.setImage(talkingImage);
             startScreenLayout.setBottom(vDBox);
-            talker.setText("Narrator");
-            animate("You talk to the guy next to you.");
+            talker.setText("");
+            animate("*chatter*");
         });
         addSadPoints(-2);
         fade3.play();
