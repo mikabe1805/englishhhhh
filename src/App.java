@@ -10,18 +10,11 @@ import javafx.scene.control.TextField;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.KeyCode;
-import javafx.scene.layout.Background;
-import javafx.scene.layout.BackgroundImage;
-import javafx.scene.layout.BackgroundPosition;
-import javafx.scene.layout.BackgroundRepeat;
-import javafx.scene.layout.BackgroundSize;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.media.Media;
 import javafx.scene.media.MediaPlayer;
 import javafx.scene.layout.VBox;
-import javafx.scene.media.Media;
-import javafx.scene.media.MediaPlayer;
 import javafx.scene.media.MediaView;
 import javafx.scene.media.MediaPlayer.Status;
 import javafx.scene.text.Font;
@@ -39,7 +32,6 @@ import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 public class App extends Application {
     Stage window;
-    private int decision;
     String name;
     private int sadPoints = 0;
     BorderPane startScreenLayout = new BorderPane();
@@ -72,6 +64,7 @@ public class App extends Application {
     Image saveImage;
     Image dontSave1Image;
     Image dontSave2Image;
+    Image bothDieImage;
     Group root2 = new Group(); 
     Group root3 = new Group(); 
     Group root4 = new Group(); 
@@ -133,6 +126,7 @@ public class App extends Application {
         saveImage = new Image(new FileInputStream("images/save.png"));
         dontSave1Image = new Image(new FileInputStream("images/dontsave1.png"));
         dontSave2Image = new Image(new FileInputStream("images/dontsave2.png"));
+        bothDieImage = new Image(new FileInputStream("images/bothdie.png"));
         letterImageView.setX(50);
         letterImageView.setY(25);
         letterImageView.setFitHeight(2120);
@@ -372,17 +366,10 @@ public class App extends Application {
                 dialogueMethod();
             });
         }
-        if (progressInt == 19) {
-            ft.setOnFinished(e -> {
-            });
-            fade.setOnFinished(e -> {
-                ft.play();
-                startScreenLayout.setCenter(letterImage);
-                letterImageView.setImage(saveOrDontImage);
-                startScreenLayout.setBottom(null);
-            });
+        if (progressInt == 23) {
             animation.setOnFinished(e -> {
-                fade.play();
+                progressInt++;
+                dialogueMethod();
             });
         }
         animation.play();
@@ -550,7 +537,7 @@ public class App extends Application {
                 }
                 else {
                     talker.setText("Lt. Homes");
-                    animate("You are one chatty group! Now, it's time to hit the hay soldiers.");
+                    animate("You guy are one chatty group! Now, it's time to hit the hay soldiers.");
                 }
                 break;
             case 19: 
@@ -564,12 +551,84 @@ public class App extends Application {
                 }
                 break;
             case 20: 
+                ft.setOnFinished(e -> {
+                });
+                fade.setOnFinished(e -> {
+                    ft.play();
+                    startScreenLayout.setCenter(letterImage);
+                    letterImageView.setImage(saveOrDontImage);
+                    startScreenLayout.setBottom(null);
+                });
+                fade.play();
+                break;
+            case 21:
                 startScreenLayout.setBottom(vDBox);
+                talker.setText("Narrator");
+                animate("You see a soldier, he looks like the one who was sitting next to you the previous night.");
+                break;
+            case 22:
                 if (talkbool)
-                    talker.setText("Gayry");
+                        talker.setText("Gayry");
                 else 
                     talker.setText("Soldier who's stuck");
                 animate("HELP! PLEASE HELP ME!");
+                break;
+            case 23: 
+                talker.setText("You (" + name + ")");
+                    if (talkbool)
+                        animate("Gayry! Hang in there!");
+                    else   
+                        animate("Hey man! Don't worry!");
+                break;
+            case 24:
+                ft.setOnFinished(e -> {
+                    soundEffectMediaPlayer.stop();
+                    soundEffectMediaPlayer.setCycleCount(1);
+                });
+                fade.setOnFinished(e -> {
+                    decisionMusic();
+                    musicMediaPlayer.pause();
+                    decision("Save", "Don't Save");
+                    ft.play();
+                });
+                fade.play(); 
+                break;
+            case 25:
+                if (savebool) {
+                    if (Math.random() > .3) {
+                        diebool = true;
+                        die();
+                    }
+                    else {
+                        talker.setText("Narrator");
+                        animate("You successfully save Gary.");
+                        letterImageView.setImage(saveImage);
+                    }
+                }
+                else {
+                    if (Math.random() < .3) {
+                        diebool = true;
+                        die();
+                    }
+                    else {
+                        talker.setText("Narrator");
+                        if (talkbool) {
+                            animate("You abandon him and get to safety, but at the cost of Gayry's life.");
+                            letterImageView.setImage(dontSave2Image);
+                        }
+                        else {
+                            animate("You abandon him and get to safety, but at the cost of the soldier's life.");
+                            letterImageView.setImage(dontSave1Image);
+                        }
+                    }
+                }
+                    break;
+                case 26:
+                if (diebool)
+                    gameOverMethod();
+                else 
+                    progressInt++;
+                    break;
         }
     }
     boolean dontopenletter;
@@ -577,6 +636,9 @@ public class App extends Application {
     boolean gotToWarBool;
     boolean talkbool;
     boolean donttalkbool;
+    boolean dontsavebool;
+    boolean savebool;
+    boolean diebool;
     public void decision(String choice1, String choice2) {
         decisionScreen = true;
         decisionHBox.getChildren().clear();
@@ -642,7 +704,22 @@ public class App extends Application {
                 dontTalk();
             });
         }
-
+        if (progressInt == 24) {
+            choice1Button.setOnAction(e -> {
+                decisionMusicMediaPlayer.stop();
+                musicMediaPlayer.play();
+                savebool = true;
+                decisionScreen = false;
+                save();
+            });
+            choice2Button.setOnAction(e -> {
+                decisionMusicMediaPlayer.stop();
+                musicMediaPlayer.play();
+                dontsavebool = true;
+                decisionScreen = false;
+                dontSave();
+            });
+        } 
     }
     
     int countDown;
@@ -673,21 +750,36 @@ public class App extends Application {
         }
     }));
 
+    Timeline animationReallyHappy = new Timeline(new KeyFrame(Duration.millis(100), e -> {
+        if (countDown < 0) {
+            countDown++;
+            sadPoints-=1;
+            sadText.setText("Sad Points: " + sadPoints);
+            happyDing();
+        }
+    }));
+
     public void addSadPoints(int amount) {
         countDown = amount;
         if (amount > 0) {
             animationSad.setCycleCount(amount);
             animationSad.play();
         }
-        else {
-            animationHappy.setCycleCount(amount*-1);
-            animationHappy.play();
+        else if (amount > 9) {
+            animationReallySad.setCycleCount(amount);
+            animationReallySad.play();
         }
-    }
-
-    public void relaxingSequence() {
-
-        //whatever
+        else {
+            if (amount < -9) {
+                animationReallyHappy.setCycleCount(amount*-1);
+                animationReallyHappy.play();
+            }
+            else {
+                animationHappy.setCycleCount(amount*-1);
+                animationHappy.play();
+            }
+            
+        }
     }
     public void dontOpenLetter() {
         startScreenLayout.setCenter(root4);
@@ -753,18 +845,50 @@ public class App extends Application {
         });
         fade3.play();
     }
-    public void goToSafety() {
 
-        if (sadPoints == 2) {
-            addSadPoints(100);
-        } else {
-            addSadPoints(4);
-        }
+    public void die() {
+        talker.setText("Narrator");
+        animate("You died too bc ur a fucking dumbass.");
+        letterImageView.setImage(bothDieImage);
+        startScreenLayout.setCenter(letterImage);
+        // save: 80% chance of death
+        // dontsave: 20% death (cry if talkbool)
+    }
+    public void save() {
+        // -2 points if talkbool = false
+        // -10 points if talkbool
+        ft.setOnFinished(e -> {
+            startScreenLayout.setBottom(vDBox);
+            talker.setText("You (" + name + ")");
+            animate("I'm coming to save you!");
+        });
+        fade3.setOnFinished(e -> {
+            ft.play();
+            startScreenLayout.setCenter(letterImage);
+            letterImageView.setImage(saveOrDontImage);
+            startScreenLayout.setBottom(null);
+        });
+        fade3.play();
+    }
+    public void dontSave() {
+        ft.setOnFinished(e -> {
+            startScreenLayout.setBottom(vDBox);
+            talker.setText("Narrator");
+            animate("You decide to not risk your life and save him.");
+        });
+        fade3.setOnFinished(e -> {
+            ft.play();
+            startScreenLayout.setCenter(letterImage);
+            letterImageView.setImage(saveOrDontImage);
+            startScreenLayout.setBottom(null);
+        });
+        fade3.play();
     }
 
     public void gameOverMethod() {
         ft.setOnFinished(e -> {});
         fade.setOnFinished(e -> {
+            startScreenLayout.setBottom(null);
             startScreenLayout.setCenter(gameOverBox);
             ft.play();
         });
