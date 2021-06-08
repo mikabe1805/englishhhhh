@@ -242,12 +242,15 @@ public class App extends Application {
         vDBox.getChildren().addAll(talkerBox, dBox);
         vDBox.setSpacing(20);
 
+        Button backToPreviousButton = new Button("Back to Last Decision");
+        backToPreviousButton.setStyle("-fx-font-size: 24");
+
         Button playAgainButton = new Button("Play Again");
         playAgainButton.setStyle("-fx-font-size: 24");
 
         playAgainButton2.setStyle("-fx-font-size: 24");
 
-        gameOverBox.getChildren().addAll(gameOver, playAgainButton);
+        gameOverBox.getChildren().addAll(gameOver, playAgainButton, backToPreviousButton);
         gameOverBox.setSpacing(20);
         gameOverBox.setAlignment(Pos.CENTER);
 
@@ -279,6 +282,40 @@ public class App extends Application {
             animate("You're sitting at home relaxing when suddenly the doorbell rings...");
         });
 
+        backToPreviousButton.setOnAction(e -> {
+            mediaPlayer.stop();
+            mediaPlayer2.stop();
+            mediaPlayer3.stop();
+            mediaPlayer4.stop();
+            mediaPlayer5.stop();
+            musicMediaPlayer.stop();
+            music();
+            if (progressInt == 8) {
+                progressInt = 5;
+                dontopenletter = false;
+                dialogueMethod();
+            }
+            if (progressInt == 11) {
+                dialogueMethod();
+            }   
+            if (progressInt == 33) {
+                progressInt = 31;
+                diebool = false;
+                dialogueMethod();
+            }
+
+            if (progressInt == 25) {
+                progressInt = 24;
+                diebool = false;
+                dialogueMethod();
+            }
+
+            if (progressInt == 28) {
+                progressInt = 27;
+                dontshootbool = false;
+                dialogueMethod();
+            }
+        });
         playAgainButton.setOnAction(e -> {
             musicMediaPlayer.stop();
             music();
@@ -369,6 +406,7 @@ public class App extends Application {
             if (e.getCode() == KeyCode.SPACE && isHappening()) {
                 progressInt++;
                 dialogueMethod();
+                System.out.println(progressInt);
             }
         });
     }
@@ -424,24 +462,28 @@ public class App extends Application {
             animation.setOnFinished(e -> {
                 progressInt++;
                 dialogueMethod();
+                System.out.println(progressInt);
             });
         }
         if (progressInt == 10 && openletter) {
             animation.setOnFinished(e -> {
                 progressInt++;
                 dialogueMethod();
+                System.out.println(progressInt);
             });
         }
         if (progressInt == 14 && gotToWarBool) {
             animation.setOnFinished(e -> {
                 progressInt++;
                 dialogueMethod();
+                System.out.println(progressInt);
             });
         }
         if (progressInt == 23) {
             animation.setOnFinished(e -> {
                 progressInt++;
                 dialogueMethod();
+                System.out.println(progressInt);
             });
         }
         if (progressInt == 25 && diebool) {
@@ -549,6 +591,7 @@ public class App extends Application {
                         soundEffectMediaPlayer.setOnEndOfMedia(() -> {
                             progressInt++;
                             dialogueMethod();
+                            System.out.println(progressInt);
                         });   
                     }
                 }
@@ -556,6 +599,7 @@ public class App extends Application {
             case 7: 
                 if (openletter){
                     openLetter();
+                    progressInt++;
                 } else {
                     dontOpenLetter();
                 }
@@ -586,10 +630,10 @@ public class App extends Application {
                 });
                 fade.play(); 
             }
+                break;
             case 9:
                 animate("...");
                 break;
-            
             case 10:
                 animate("...what do I do?");
                 break;
@@ -870,6 +914,7 @@ public class App extends Application {
                 openletter = true;
                 progressInt++;
                 dialogueMethod();
+                System.out.println(progressInt);
             });
             choice2Button.setOnAction(e -> {
                 decisionMusicMediaPlayer.stop();
@@ -878,6 +923,7 @@ public class App extends Application {
                 dontopenletter = true;
                 progressInt++;
                 dialogueMethod();
+                System.out.println(progressInt);
             });
         }
         if (progressInt == 11) {
@@ -1025,6 +1071,7 @@ public class App extends Application {
         mediaPlayer4.setOnEndOfMedia(() -> {
             progressInt++;
             dialogueMethod();
+            System.out.println(progressInt);
         });    
         mediaPlayer4.play();
         mediaPlayer4.setRate(1.5);
@@ -1125,6 +1172,7 @@ public class App extends Application {
             talker.setText("Narrator");
             animate("You decide to shoot, killing the man.");
             startScreenLayout.setBottom(vDBox);
+            System.out.println(progressInt);
         });
         fade3.setOnFinished(e -> {
             ft.play();
@@ -1140,6 +1188,7 @@ public class App extends Application {
             talker.setText("Narrator");
             animate("You decide to not shoot, and end up getting killed.");
             startScreenLayout.setBottom(vDBox);
+            System.out.println(progressInt);
         });
         fade3.setOnFinished(e -> {
             ft.play();
@@ -1155,6 +1204,7 @@ public class App extends Application {
             talker.setText("You (" + name + ")");
             animate("Actually, I'll play!");
             startScreenLayout.setBottom(vDBox);
+            System.out.println(progressInt);
         });
         fade3.setOnFinished(e -> {
             ft.play();
@@ -1170,6 +1220,7 @@ public class App extends Application {
             talker.setText("You (" + name + ")");
             animate("I'm gonna sit this one out, y'all have fun.");
             startScreenLayout.setBottom(vDBox);
+            System.out.println(progressInt);
         });
         fade3.setOnFinished(e -> {
             ft.play();
@@ -1180,7 +1231,6 @@ public class App extends Application {
         fade3.play();
     }
     public void gameOverMethod() {
-        progressInt = -10;
         ft.setOnFinished(e -> {});
         fade.setOnFinished(e -> {
             startScreenLayout.setBottom(null);
@@ -1190,7 +1240,6 @@ public class App extends Application {
         fade.play();
     }
     public void altGameOverMethod() {
-        progressInt = -10;
         ft.setOnFinished(e -> {});
         fade.setOnFinished(e -> {
             startScreenLayout.setBottom(null);
