@@ -261,6 +261,8 @@ public class App extends Application {
             gotToWarBool = false;
             talkbool = false;
             donttalkbool = false;
+            savebool = false;
+            dontsavebool = false;
             mediaPlayer.stop();
             mediaPlayer2.stop();
             mediaPlayer3.stop();
@@ -371,6 +373,10 @@ public class App extends Application {
                 progressInt++;
                 dialogueMethod();
             });
+        }
+        if (progressInt == 25 && diebool) {
+            progressInt++;
+            dialogueMethod();
         }
         animation.play();
     }
@@ -595,18 +601,25 @@ public class App extends Application {
                 break;
             case 25:
                 if (savebool) {
-                    if (Math.random() > .3) {
+                    if (Math.random() > .2) {
                         diebool = true;
                         die();
                     }
                     else {
                         talker.setText("Narrator");
-                        animate("You successfully save Gary.");
+                        if (talkbool) {
+                            animate("You successfully save Gayry.");
+                            addSadPoints(-10);
+                        }
+                        else {
+                            animate("You successfully save the soldier.");
+                            addSadPoints(-2);
+                        }
                         letterImageView.setImage(saveImage);
                     }
                 }
                 else {
-                    if (Math.random() < .3) {
+                    if (Math.random() < .2) {
                         diebool = true;
                         die();
                     }
@@ -615,19 +628,24 @@ public class App extends Application {
                         if (talkbool) {
                             animate("You abandon him and get to safety, but at the cost of Gayry's life.");
                             letterImageView.setImage(dontSave2Image);
+                            addSadPoints(100);
                         }
                         else {
                             animate("You abandon him and get to safety, but at the cost of the soldier's life.");
                             letterImageView.setImage(dontSave1Image);
+                            addSadPoints(3);
                         }
                     }
                 }
                     break;
                 case 26:
-                if (diebool)
-                    gameOverMethod();
-                else 
-                    progressInt++;
+                    if (diebool)
+                        gameOverMethod();
+                    else 
+                        progressInt++;
+                    break;
+                case 27: 
+                    
                     break;
         }
     }
@@ -761,13 +779,13 @@ public class App extends Application {
 
     public void addSadPoints(int amount) {
         countDown = amount;
-        if (amount > 0) {
-            animationSad.setCycleCount(amount);
-            animationSad.play();
-        }
-        else if (amount > 9) {
+        if (amount > 9) {
             animationReallySad.setCycleCount(amount);
             animationReallySad.play();
+        }
+        else if (amount > 0) {
+            animationSad.setCycleCount(amount);
+            animationSad.play();
         }
         else {
             if (amount < -9) {
@@ -848,15 +866,11 @@ public class App extends Application {
 
     public void die() {
         talker.setText("Narrator");
-        animate("You died too bc ur a fucking dumbass.");
+        animate("Then you died too bc ur a fucking dumbass.");
         letterImageView.setImage(bothDieImage);
         startScreenLayout.setCenter(letterImage);
-        // save: 80% chance of death
-        // dontsave: 20% death (cry if talkbool)
     }
     public void save() {
-        // -2 points if talkbool = false
-        // -10 points if talkbool
         ft.setOnFinished(e -> {
             startScreenLayout.setBottom(vDBox);
             talker.setText("You (" + name + ")");
