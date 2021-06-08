@@ -48,7 +48,8 @@ public class App extends Application {
     MediaPlayer mediaPlayer2;
     MediaPlayer mediaPlayer3;
     MediaPlayer mediaPlayer4;
-    MediaPlayer mediaPlayer5;
+    MediaPlayer mediaPlayer5; 
+    MediaPlayer mediaPlayer6;
     MediaPlayer dingMediaPlayer;
     MediaPlayer musicMediaPlayer;
     MediaPlayer decisionMusicMediaPlayer;
@@ -62,14 +63,20 @@ public class App extends Application {
     Image gameOverImage;
     Image shootImage;
     Image saveOrDontImage;
+    Image smokeGrenadeImage;
     Image saveImage;
     Image dontSave1Image;
     Image dontSave2Image;
     Image bothDieImage;
+    Image havingFunImage;
+    Image missingOutImage;
+    Image someoneDiesImage;
+    Image youDieImage;
     Group root2 = new Group(); 
     Group root3 = new Group(); 
     Group root4 = new Group(); 
     Group root5 = new Group(); 
+    Group root6 = new Group();
     Group gameOver = new Group();
     ImageView letterImageView = new ImageView();
     ImageView gameOverImageView = new ImageView();
@@ -77,6 +84,7 @@ public class App extends Application {
     FadeTransition fade2 = new FadeTransition(); 
     FadeTransition fade3 = new FadeTransition();
     FadeTransition ft = new FadeTransition(Duration.millis(1000));
+    Button playAgainButton2 = new Button("Play Again");
     public static void main(String[] args) {
         launch(args);
     }
@@ -129,6 +137,12 @@ public class App extends Application {
         dontSave2Image = new Image(new FileInputStream("images/dontsave2.png"));
         bothDieImage = new Image(new FileInputStream("images/bothdie.png"));
         shootImage = new Image(new FileInputStream("images/shoot.png"));
+        smokeGrenadeImage = new Image(new FileInputStream("images/smokeGrenades.png"));
+        youDieImage = new Image(new FileInputStream("images/youdie.png"));
+        someoneDiesImage = new Image(new FileInputStream("images/someonedies.png"));
+        havingFunImage = new Image(new FileInputStream("images/havingfun.png"));
+        missingOutImage = new Image(new FileInputStream("images/missingout.png"));
+
         letterImageView.setX(50);
         letterImageView.setY(25);
         letterImageView.setFitHeight(2120);
@@ -178,6 +192,12 @@ public class App extends Application {
         MediaView mediaView5 = new MediaView(mediaPlayer5);  
         root5.getChildren().add(mediaView5); 
 
+        String path6 = "animations/done.mp4";
+        Media media6 = new Media(new File(path6).toURI().toString());  
+        mediaPlayer6 = new MediaPlayer(media6);  
+        MediaView mediaView6 = new MediaView(mediaPlayer6);  
+        root6.getChildren().add(mediaView6);
+
         VBox beginningVBox = new VBox();
         window.setTitle("English Project");
         Button playButton = new Button("Play");
@@ -225,6 +245,8 @@ public class App extends Application {
         Button playAgainButton = new Button("Play Again");
         playAgainButton.setStyle("-fx-font-size: 24");
 
+        playAgainButton2.setStyle("-fx-font-size: 24");
+
         gameOverBox.getChildren().addAll(gameOver, playAgainButton);
         gameOverBox.setSpacing(20);
         gameOverBox.setAlignment(Pos.CENTER);
@@ -267,12 +289,17 @@ public class App extends Application {
             dontsavebool = false;
             dontshootbool = false;
             shootbool = false;
+            diebool = false;
+            playbool = false;
+            dontplaybool = false;
+
             mediaPlayer.stop();
             mediaPlayer2.stop();
             mediaPlayer3.stop();
             mediaPlayer4.stop();
             mediaPlayer5.stop();
             nameTextField.setText("");
+            sadText.setText("Sad Points: 0");
             sadPoints = 0;
             progressInt = 0;
             dialogue.setText("");
@@ -287,6 +314,42 @@ public class App extends Application {
             beginningHBox.setPadding(new Insets(10,10,10,10));
         });
 
+        playAgainButton2.setOnAction(e -> {
+            
+            dontopenletter = false;
+            openletter = false;
+            gotToWarBool = false;
+            talkbool = false;
+            donttalkbool = false;
+            savebool = false;
+            dontsavebool = false;
+            dontshootbool = false;
+            shootbool = false;
+            diebool = false;
+            playbool = false;
+            dontplaybool = false;
+
+            mediaPlayer.stop();
+            mediaPlayer2.stop();
+            mediaPlayer3.stop();
+            mediaPlayer4.stop();
+            mediaPlayer5.stop();
+            mediaPlayer6.stop();
+            nameTextField.setText("");
+            sadText.setText("Sad Points: 0");
+            sadPoints = 0;
+            progressInt = 0;
+            dialogue.setText("");
+            talker.setText("");
+            beginningHBox.getChildren().remove(sadText);
+            beginningVBox.getChildren().addAll(nameTextField, nameText);
+            startScreenLayout.setTop(null);
+            startScreenLayout.setLeft(startImage1);
+            startScreenLayout.setRight(startImage2);
+            startScreenLayout.setBottom(vDBox);
+            startScreenLayout.setCenter(beginningHBox);
+            beginningHBox.setPadding(new Insets(10,10,10,10));
+        });
         scene.setOnKeyPressed(e -> {
             if (e.getCode() == KeyCode.ENTER) {
                 if (progressInt == 0) {
@@ -406,6 +469,26 @@ public class App extends Application {
         if (progressInt == 28 && dontshootbool) {
             animation.setOnFinished(e -> {
                 gameOverMethod();
+            });
+        }
+        if (progressInt == 31) {
+            ft.setOnFinished(e -> {
+                soundEffectMediaPlayer.stop();
+                soundEffectMediaPlayer.setCycleCount(1);
+            });
+            fade.setOnFinished(e -> {
+                decisionMusic();
+                musicMediaPlayer.pause();
+                decision("Play", "Don't Play");
+                ft.play();
+            }); 
+            animation.setOnFinished(e -> {
+                fade.play();
+            }); 
+        }
+        if (progressInt == 33 && diebool) {
+            animation.setOnFinished(e -> {
+            gameOverMethod();
             });
         }
         animation.play();
@@ -573,7 +656,7 @@ public class App extends Application {
                 }
                 else {
                     talker.setText("Lt. Homes");
-                    animate("You guy are one chatty group! Now, it's time to hit the hay soldiers.");
+                    animate("You guys are one chatty group! Now, it's time to hit the hay soldiers.");
                 }
                 break;
             case 19: 
@@ -686,7 +769,64 @@ public class App extends Application {
                     talker.setText("You (" + name + ")");
                     animate("Should I shoot him?");
                     break;
-                case 28:
+                case 29:
+                    ft.setOnFinished(e -> {
+                    });
+                    fade3.setOnFinished(e -> {
+                        ft.play();
+                        startScreenLayout.setCenter(letterImage);
+                        letterImageView.setImage(smokeGrenadeImage);
+                        talker.setText("Narrator");
+                        animate("You see 2 fellow soldiers in your platoon chatting, one of them holding a smoke grenade.");
+                        startScreenLayout.setBottom(vDBox);
+                    });
+                    fade3.play();
+                    break;
+                case 30:
+                    talker.setText("Soldier 1");
+                    animate("Yo " + name + ", wanna throw this smoke grenade around with us?");
+                    break;
+                case 31:
+                    talker.setText("You (" + name + ")");
+                    animate("I don't know, that could be dangerous...");
+                    break;
+                case 33:    
+                    if (playbool) {
+                        if (Math.random() < 0.4) {
+                            diebool = true;
+                            letterImageView.setImage(youDieImage);
+                            talker.setText("Narrator");
+                            animate("You mishandle the smoke grenade, and it kills you.");
+                        }
+                        else {
+                            talker.setText("Narrator");
+                            animate("You and your fellow soldiers have a fun time, you're glad you said yes.");
+                            addSadPoints(-3);
+                        }
+                    }
+                    else {
+                        if (Math.random() < 0.5) {
+                            letterImageView.setImage(someoneDiesImage);
+                            talker.setText("Narrator");
+                            animate("One of the soldiers dies, you sigh a sigh of relief it wasn't you.");
+                            addSadPoints(-3);
+                        }
+                        else {
+                            talker.setText("Narrator");
+                            animate("You see the 2 soldiers playing and having fun, wishing you had joined in.");
+                            addSadPoints(3);
+                        }
+
+                    }
+                    break;
+                case 34: 
+                    startScreenLayout.setBottom(null);
+                    startScreenLayout.setCenter(root6);
+                    mediaPlayer6.setOnEndOfMedia(() -> {
+                        altGameOverMethod();
+                    });
+                    mediaPlayer6.play();
+                    mediaPlayer6.setRate(1.35);
                     break;
         }
     }
@@ -700,6 +840,8 @@ public class App extends Application {
     boolean diebool;
     boolean shootbool;
     boolean dontshootbool;
+    boolean dontplaybool;
+    boolean playbool;
     public void decision(String choice1, String choice2) {
         decisionScreen = true;
         decisionHBox.getChildren().clear();
@@ -795,6 +937,22 @@ public class App extends Application {
                 dontshootbool = true;
                 decisionScreen = false;
                 dontShoot();
+            });
+        } 
+        if (progressInt == 31) {
+            choice1Button.setOnAction(e -> {
+                decisionMusicMediaPlayer.stop();
+                musicMediaPlayer.play();
+                playbool = true;
+                decisionScreen = false;
+                playGame();
+            });
+            choice2Button.setOnAction(e -> {
+                decisionMusicMediaPlayer.stop();
+                musicMediaPlayer.play();
+                dontplaybool = true;
+                decisionScreen = false;
+                dontPlayGame();
             });
         } 
     }
@@ -987,12 +1145,52 @@ public class App extends Application {
         });
         fade3.play();
     }
+    public void playGame() {
+        ft.setOnFinished(e -> {
+            progressInt++;
+            talker.setText("You (" + name + ")");
+            animate("Actually, I'll play!");
+            startScreenLayout.setBottom(vDBox);
+        });
+        fade3.setOnFinished(e -> {
+            ft.play();
+            startScreenLayout.setCenter(letterImage);
+            letterImageView.setImage(havingFunImage);
+            startScreenLayout.setBottom(null);
+        });
+        fade3.play();
+    }
+    public void dontPlayGame() {
+        ft.setOnFinished(e -> {
+            progressInt++;
+            talker.setText("You (" + name + ")");
+            animate("I'm gonna sit this one out, y'all have fun.");
+            startScreenLayout.setBottom(vDBox);
+        });
+        fade3.setOnFinished(e -> {
+            ft.play();
+            startScreenLayout.setCenter(letterImage);
+            letterImageView.setImage(missingOutImage);
+            startScreenLayout.setBottom(null);
+        });
+        fade3.play();
+    }
     public void gameOverMethod() {
         progressInt = -10;
         ft.setOnFinished(e -> {});
         fade.setOnFinished(e -> {
             startScreenLayout.setBottom(null);
             startScreenLayout.setCenter(gameOverBox);
+            ft.play();
+        });
+        fade.play();
+    }
+    public void altGameOverMethod() {
+        progressInt = -10;
+        ft.setOnFinished(e -> {});
+        fade.setOnFinished(e -> {
+            startScreenLayout.setBottom(null);
+            startScreenLayout.setCenter(playAgainButton2);
             ft.play();
         });
         fade.play();
