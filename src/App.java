@@ -280,6 +280,8 @@ public class App extends Application {
         });
 
         playAgainButton.setOnAction(e -> {
+            musicMediaPlayer.stop();
+            music();
             dontopenletter = false;
             openletter = false;
             gotToWarBool = false;
@@ -315,7 +317,8 @@ public class App extends Application {
         });
 
         playAgainButton2.setOnAction(e -> {
-            
+            musicMediaPlayer.stop();
+            music();
             dontopenletter = false;
             openletter = false;
             gotToWarBool = false;
@@ -825,6 +828,7 @@ public class App extends Application {
                     mediaPlayer6.setOnEndOfMedia(() -> {
                         altGameOverMethod();
                     });
+                    musicMediaPlayer.stop();
                     mediaPlayer6.play();
                     mediaPlayer6.setRate(1.35);
                     break;
