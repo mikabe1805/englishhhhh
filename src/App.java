@@ -60,6 +60,7 @@ public class App extends Application {
     Image silentImage;
     Image talkingImage;
     Image gameOverImage;
+    Image shootImage;
     Image saveOrDontImage;
     Image saveImage;
     Image dontSave1Image;
@@ -127,6 +128,7 @@ public class App extends Application {
         dontSave1Image = new Image(new FileInputStream("images/dontsave1.png"));
         dontSave2Image = new Image(new FileInputStream("images/dontsave2.png"));
         bothDieImage = new Image(new FileInputStream("images/bothdie.png"));
+        shootImage = new Image(new FileInputStream("images/shoot.png"));
         letterImageView.setX(50);
         letterImageView.setY(25);
         letterImageView.setFitHeight(2120);
@@ -263,6 +265,8 @@ public class App extends Application {
             donttalkbool = false;
             savebool = false;
             dontsavebool = false;
+            dontshootbool = false;
+            shootbool = false;
             mediaPlayer.stop();
             mediaPlayer2.stop();
             mediaPlayer3.stop();
@@ -375,8 +379,34 @@ public class App extends Application {
             });
         }
         if (progressInt == 25 && diebool) {
-            progressInt++;
-            dialogueMethod();
+            animation.setOnFinished(e -> {
+                gameOverMethod();
+            });
+        }
+        if (progressInt == 27) {
+            ft.setOnFinished(e -> {
+                soundEffectMediaPlayer.stop();
+                soundEffectMediaPlayer.setCycleCount(1);
+            });
+            fade.setOnFinished(e -> {
+                decisionMusic();
+                musicMediaPlayer.pause();
+                decision("Shoot", "Don't Shoot");
+                ft.play();
+            }); 
+            animation.setOnFinished(e -> {
+                fade.play();
+            }); 
+        }
+        if (progressInt == 28 && shootbool) {
+            animation.setOnFinished(e -> {
+                addSadPoints(3);
+            });
+        }
+        if (progressInt == 28 && dontshootbool) {
+            animation.setOnFinished(e -> {
+                gameOverMethod();
+            });
         }
         animation.play();
     }
@@ -638,14 +668,25 @@ public class App extends Application {
                     }
                 }
                     break;
-                case 26:
-                    if (diebool)
-                        gameOverMethod();
-                    else 
-                        progressInt++;
+                case 26: 
+                    ft.setOnFinished(e -> {
+                        talker.setText("Narrator");
+                        animate("You see an enemy soldier, but he doesn't seem to have noticed you.");
+                        startScreenLayout.setBottom(vDBox);
+                    });
+                    fade3.setOnFinished(e -> {
+                        ft.play();
+                        startScreenLayout.setCenter(letterImage);
+                        letterImageView.setImage(shootImage);
+                        startScreenLayout.setBottom(null);
+                    });
+                    fade3.play();
                     break;
                 case 27: 
-                    
+                    talker.setText("You (" + name + ")");
+                    animate("Should I shoot him?");
+                    break;
+                case 28:
                     break;
         }
     }
@@ -657,6 +698,8 @@ public class App extends Application {
     boolean dontsavebool;
     boolean savebool;
     boolean diebool;
+    boolean shootbool;
+    boolean dontshootbool;
     public void decision(String choice1, String choice2) {
         decisionScreen = true;
         decisionHBox.getChildren().clear();
@@ -736,6 +779,22 @@ public class App extends Application {
                 dontsavebool = true;
                 decisionScreen = false;
                 dontSave();
+            });
+        } 
+        if (progressInt == 27) {
+            choice1Button.setOnAction(e -> {
+                decisionMusicMediaPlayer.stop();
+                musicMediaPlayer.play();
+                shootbool = true;
+                decisionScreen = false;
+                shoot();
+            });
+            choice2Button.setOnAction(e -> {
+                decisionMusicMediaPlayer.stop();
+                musicMediaPlayer.play();
+                dontshootbool = true;
+                decisionScreen = false;
+                dontShoot();
             });
         } 
     }
@@ -844,9 +903,9 @@ public class App extends Application {
             ft.play();
             startScreenLayout.setCenter(letterImage);
             letterImageView.setImage(talkingImage);
-            startScreenLayout.setBottom(vDBox);
             talker.setText("");
             animate("*chatter*");
+            startScreenLayout.setBottom(vDBox);
         });
         addSadPoints(-2);
         fade3.play();
@@ -872,9 +931,9 @@ public class App extends Application {
     }
     public void save() {
         ft.setOnFinished(e -> {
-            startScreenLayout.setBottom(vDBox);
             talker.setText("You (" + name + ")");
             animate("I'm coming to save you!");
+            startScreenLayout.setBottom(vDBox);
         });
         fade3.setOnFinished(e -> {
             ft.play();
@@ -886,9 +945,9 @@ public class App extends Application {
     }
     public void dontSave() {
         ft.setOnFinished(e -> {
-            startScreenLayout.setBottom(vDBox);
             talker.setText("Narrator");
             animate("You decide to not risk your life and save him.");
+            startScreenLayout.setBottom(vDBox);
         });
         fade3.setOnFinished(e -> {
             ft.play();
@@ -898,8 +957,38 @@ public class App extends Application {
         });
         fade3.play();
     }
-
+    public void shoot() {
+        ft.setOnFinished(e -> {
+            progressInt++;
+            talker.setText("Narrator");
+            animate("You decide to shoot, killing the man.");
+            startScreenLayout.setBottom(vDBox);
+        });
+        fade3.setOnFinished(e -> {
+            ft.play();
+            startScreenLayout.setCenter(letterImage);
+            letterImageView.setImage(shootImage);
+            startScreenLayout.setBottom(null);
+        });
+        fade3.play();
+    }
+    public void dontShoot() {
+        ft.setOnFinished(e -> {
+            progressInt++;
+            talker.setText("Narrator");
+            animate("You decide to not shoot, and end up getting killed.");
+            startScreenLayout.setBottom(vDBox);
+        });
+        fade3.setOnFinished(e -> {
+            ft.play();
+            startScreenLayout.setCenter(letterImage);
+            letterImageView.setImage(shootImage);
+            startScreenLayout.setBottom(null);
+        });
+        fade3.play();
+    }
     public void gameOverMethod() {
+        progressInt = -10;
         ft.setOnFinished(e -> {});
         fade.setOnFinished(e -> {
             startScreenLayout.setBottom(null);
