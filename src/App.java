@@ -1087,7 +1087,7 @@ public class App extends Application {
 
     public void die() {
         talker.setText("Narrator");
-        animate("Then you died too bc ur a fucking dumbass.");
+        animate("You died too :(");
         letterImageView.setImage(bothDieImage);
         startScreenLayout.setCenter(letterImage);
     }
